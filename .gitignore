@@ -155,3 +155,5 @@ CMakeLists.txt.user*
 ## Other Files
 *.txt
 *.qm
+*.gz
+
