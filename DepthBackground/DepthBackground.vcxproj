@@ -150,18 +150,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="BackgroundEstimation.cpp" />
-    <ClCompile Include="DepthBackground.cpp" />
+    <ClCompile Include="src\BackgroundEstimation.cpp" />
+    <ClCompile Include="src\DepthBackground.cpp" />
     <ClCompile Include="src\ParameterBase.cpp" />
     <ClCompile Include="src\ParameterViewSyn.cpp" />
     <ClCompile Include="src\yuv.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="BackgroundEstimation.h" />
+    <ClInclude Include="include\BackgroundEstimation.h" />
     <ClInclude Include="include\ParameterBase.h" />
     <ClInclude Include="include\ParameterViewSyn.h" />
+    <ClInclude Include="include\version.h" />
     <ClInclude Include="include\yuv.h" />
-    <ClInclude Include="version.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
