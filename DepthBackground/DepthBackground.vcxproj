@@ -154,12 +154,14 @@
     <ClCompile Include="src\DepthBackground.cpp" />
     <ClCompile Include="src\ParameterBase.cpp" />
     <ClCompile Include="src\ParameterViewSyn.cpp" />
+    <ClCompile Include="src\PixelHist.cpp" />
     <ClCompile Include="src\yuv.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\BackgroundEstimation.h" />
     <ClInclude Include="include\ParameterBase.h" />
     <ClInclude Include="include\ParameterViewSyn.h" />
+    <ClInclude Include="include\PixelHist.h" />
     <ClInclude Include="include\version.h" />
     <ClInclude Include="include\yuv.h" />
   </ItemGroup>

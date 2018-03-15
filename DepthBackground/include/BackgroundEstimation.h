@@ -2,6 +2,8 @@
 #define BackgroundEstimation_h__
 
 #include <opencv2/highgui/highgui.hpp>
+#include <iostream>
+#include <fstream>
 #include "ParameterViewSyn.h"
 #include "yuv.h"
 
@@ -17,6 +19,8 @@ public:
 	void printTestMemory(int rowstart, int colstart, int width, int frame);
 
 	bool writeOneFrame(CIYuv *yuvBuffer, int n);
+
+	void writeOnePixeltoFile(int x, int y, int frame);
 
 private:
 	int m_iWidth;
@@ -39,6 +43,8 @@ public:
 
 	CIYuv* getFrameBuffer() { return m_pcVideo; }
 	cv::Mat* getBgrBuffer() { return m_pcBgr; }
+	CDepthMap* getDepthMapBuffer() { return m_pcDepthMap; }
+	BYTE* getCertainPixelDepthMapBuffer() { return m_pcCertainPixelDepthMap; }
 
 	void showCurrentImage();
 	bool writeCurrentImage();
@@ -47,6 +53,9 @@ public:
 
 	bool writeOneDepthMap(CIYuv *yuvBuffer, int n); 
 
+	void writeOnePixeltoFile(int x, int y, int frame);
+
+	void extractCertainPixelDepthMap(int x, int y, int startframe);
 
 private:
 	int m_iWidth;
@@ -58,6 +67,8 @@ private:
 	CIYuv *m_pcVideo;
 	cv::Mat *m_pcBgr;
 	CDepthMap *m_pcDepthMap;
+
+	BYTE *m_pcCertainPixelDepthMap;
 	
 };
 #endif // BackgroundEstimation_h__

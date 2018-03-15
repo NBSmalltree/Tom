@@ -18,7 +18,7 @@ using namespace cv;
 
 //--------------------------全局函数开关;--------------------------------
 
-# define HISTOGRAM 0
+# define HISTOGRAM 1
 
 # define SIFT_AND_BFMATCHER 0
 # define SURF_AND_BFMATCHER 0
@@ -163,7 +163,7 @@ int main(int argc, char ** argv) {
 	*/
 
 	//--------------------------直方图均衡化(彩色)main调用;----------------------------
-	
+	/*
 	Mat srcImage, dstImage, dstImageBlue, dstImageGreen, dstImageRed;
 	srcImage = imread("1.jpg", 1);
 	if (!srcImage.data) { printf("读取图片错误，请确定目录下是否有imread函数指定图片存在~！; \n"); return false; }
@@ -197,7 +197,7 @@ int main(int argc, char ** argv) {
 	imshow("经过直方图均衡化后的图;", dstImage);
 	
 	imwrite("out2.png", dstImage);
-	
+	*/
 
 	//--------------------------绘制H-S直方图main调用;---------------------------------
 	/*
@@ -252,7 +252,7 @@ int main(int argc, char ** argv) {
 	*/
 
 	//--------------------------绘制一维直方图main调用;--------------------------------
-	/*
+	
 	Mat srcImage = imread("1.jpg", 0);
 	imshow("原图;", srcImage);
 	if (!srcImage.data) { cout << "Fail to Load Image" << endl; return 0; }
@@ -285,7 +285,7 @@ int main(int argc, char ** argv) {
 	}
 
 	imshow("一维直方图;", dstImage);
-	*/
+	
 
 	//--------------------------绘制RGB三色直方图main调用;-----------------------------
 	/*
@@ -1121,7 +1121,7 @@ int main(int argc, char ** argv) {
 	}
 	
 #endif // INPAINT
-
+/*
 	Mat src = imread("1.jpg", 2 | 4);
 
 	Msrcr msrcr;
@@ -1139,7 +1139,7 @@ int main(int argc, char ** argv) {
 	Mat dst;
 	msrcr.MultiScaleRetinexCR(src, dst, weight,sigema,100,100);
 	cv::imshow("dst", dst);
-
+*/
 	waitKey(0);
 	return 1;
 }

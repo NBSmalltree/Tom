@@ -1,5 +1,7 @@
 #include "BackgroundEstimation.h"
 
+//using namespace std;
+
 CDepthMap::CDepthMap()
 {
 	DEPTHMAP = NULL;
@@ -92,6 +94,23 @@ bool CDepthMap::writeOneFrame(CIYuv *yuvBuffer, int n)
 	return true;
 }
 
+void CDepthMap::writeOnePixeltoFile(int x, int y, int frame)
+{
+	std::string testFileName = "TestPixel_(";
+	testFileName += std::to_string(x);
+	testFileName += ',';
+	testFileName += std::to_string(y);
+	testFileName += ").txt";
+
+	std::ofstream outf;
+	outf.open(testFileName, std::ios::app);
+	
+	outf << (int)DEPTHMAP[frame][y*m_iWidth + x] << ' ';
+
+	outf.close();
+
+}
+
 CBackgroundEstimation::CBackgroundEstimation()
 {
 	m_pcVideo = NULL;
@@ -122,6 +141,9 @@ bool CBackgroundEstimation::Init(ParameterViewSyn cParameter)
 	m_pcDepthMap = new CDepthMap(m_iHeight, m_iWidth, m_iUpdateStep);
 	//m_pcDepthMap->printTestMemory();
 
+	if ((m_pcCertainPixelDepthMap = (BYTE *)malloc(m_iHeight * m_iWidth * sizeof(BYTE))) == NULL) return false;
+	memset(m_pcCertainPixelDepthMap, 0, m_iHeight * m_iWidth);
+
 	return true;
 }
 
@@ -151,4 +173,21 @@ void CBackgroundEstimation::showDepthMapTestMemory(int rowstart, int colstart, i
 bool CBackgroundEstimation::writeOneDepthMap(CIYuv *yuvBuffer, int n)
 {
 	return m_pcDepthMap->writeOneFrame(yuvBuffer, n);
+}
+
+void CBackgroundEstimation::writeOnePixeltoFile(int x, int y, int frame)
+{
+	m_pcDepthMap->writeOnePixeltoFile(x, y, frame);
+}
+
+void CBackgroundEstimation::extractCertainPixelDepthMap(int x, int y, int startframe)
+{
+	int i;
+
+	for (i = 0; i < m_iUpdateStep; i++)
+		m_pcCertainPixelDepthMap[i] = 0;
+
+	for (i = 0; i < m_iUpdateStep; i++)
+		m_pcCertainPixelDepthMap[i] = m_pcDepthMap->DEPTHMAP[startframe + i][y*m_iWidth + x];
+
 }

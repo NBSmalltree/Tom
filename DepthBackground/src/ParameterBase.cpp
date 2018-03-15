@@ -226,21 +226,17 @@ ParameterBase::xReadLine( FILE* hFile, std::string* pacTag )
     {
       bComment = true;
     }
-    if( ! bComment )
-    {
-      if ( cChar == '\t' || cChar == ' ' ) // white space
-      {
+    if( ! bComment ) {
+      if ( cChar == '\t' || cChar == ' ' ) {// white space
         if ( uiTagNum == 3 ) return -1 ;
-        if( ! pcTag->empty() )
-        {
+        if( ! pcTag->empty() ) {
           uiTagNum++;
           pcTag = &pacTag[uiTagNum]; 
         }
-    }
-    else
-    {
-      *pcTag += cChar;
-     }
+	  }
+	  else {
+		  *pcTag += cChar;
+	  }
     }
   }
   return 1;
