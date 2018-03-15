@@ -1,5 +1,6 @@
 #include <iostream>
 #include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/video/background_segm.hpp>
 #include <yuv.h>
 
@@ -33,14 +34,18 @@ int main()
 		return 2;
 
 	//读取设定帧;
-	//if (!yuvBuffer.ReadOneFrame(fin_yuv, 0))
+	//if (!yuvBuffer.ReadOneFrame(fin_view_l_ori, 0))
 	//	return 2;
 
 	//将YUV图片格式转换为Mat类型;
-	//yuvBuffer.getData_inBGR(&bgr);
+	//yuvBuffer.getData_inBGR(&bgrImage);
 
 	//初始化成功测试;
-	//imshow("输出图;", bgr);
+	//cv::imshow("输出图;", bgrImage);
+
+	//>【Test】Write Test
+	//cv::cvtColor(bgrImage, bgrImage, CV_RGB2GRAY);
+	//cv::imwrite("OutputImage.png", bgrImage);
 
 	//写入到YUV文件测试;
 	//yuvBuffer.setDataFromImgBGR(&bgr);
