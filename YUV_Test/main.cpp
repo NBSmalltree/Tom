@@ -3,14 +3,16 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/video/background_segm.hpp>
 #include <yuv.h>
+#include "function.h"
 
 using namespace std;
 
 #define BACKGROUND_AVERAGE 0
 #define BACKGROUND_GMM 0
-#define HOLEFILL 1
+#define HOLEFILL 0
+#define PSNR_AND_MSSIM 1
 
-int main()
+int main(int argc, char ** argv)
 {
 	//写入配置;
 	vector<int>compression_params;
@@ -18,20 +20,20 @@ int main()
 	compression_params.push_back(9);
 
 	//申明存放Mat类型空间;
-	cv::Mat bgrImage(768, 1024, CV_8UC3);
+	//cv::Mat bgrImage(768, 1024, CV_8UC3);
 	//读取文件流;
-	CIYuv yuvBuffer;
-	FILE *fin_view_l_ori, *fin_view_l_forward;
+	//CIYuv yuvBuffer;
+	//FILE *fin_view_l_ori, *fin_view_l_forward;
 	//原始序列;syn_left
-	if ((fin_view_l_ori = fopen("bookarrival_6.yuv", "rb")) == NULL || 
-		(fin_view_l_forward = fopen("syn_left.yuv", "rb")) == NULL) {
-		fprintf(stderr, "Can't open input file(s)\n");
-		return 2;
-	}
+	//if ((fin_view_l_ori = fopen("bookarrival_6.yuv", "rb")) == NULL || 
+	//	(fin_view_l_forward = fopen("syn_left.yuv", "rb")) == NULL) {
+	//	fprintf(stderr, "Can't open input file(s)\n");
+	//	return 2;
+	//}
 
 	//设置YUV序列参数;
-	if (!yuvBuffer.Resize(768, 1024, 420))
-		return 2;
+	//if (!yuvBuffer.Resize(768, 1024, 420))
+	//	return 2;
 
 	//读取设定帧;
 	//if (!yuvBuffer.ReadOneFrame(fin_view_l_ori, 0))
@@ -128,10 +130,66 @@ int main()
 #endif // HOLEFILL	
 
 	//关闭流;
-	fclose(fin_view_l_ori);
-	fclose(fin_view_l_forward);
+	//fclose(fin_view_l_ori);
+	//fclose(fin_view_l_forward);
 
-	cv::waitKey(0);
+	//cv::waitKey(0);
+
+#if PSNR_AND_MSSIM
+
+	//>申明存放Mat类型空间
+	cv::Mat srcImage1(768, 1024, CV_8UC3);
+	cv::Mat srcImage2(768, 1024, CV_8UC3);
+
+	//>读取文件流
+	FILE *fin_src1, *fin_src2;
+	if ((fin_src1 = fopen(argv[1], "rb")) == NULL ||
+		(fin_src2 = fopen(argv[2], "rb")) == NULL) {
+		fprintf(stderr, "Can't open input file(s)\n");
+		return 2;
+	}
+	int totalFrame = atoi(argv[3]);
+
+	//>Init YUV Buffer
+	CIYuv yuvBuffer;
+	if (!yuvBuffer.Resize(768, 1024, 420))
+		return 2;
+
+	//>Init sumValue;
+	double sumOfPSNR = 0;
+	cv::Scalar sumOfMSSIM = 0;
+
+	//>Start Processing
+	for (int i = 0; i < totalFrame; i++) {
+
+		//>Read Certain Frame 1
+		if (!yuvBuffer.ReadOneFrame(fin_src1, 0))
+			return 2;
+
+		//>Transfer to Mat 1
+		yuvBuffer.getData_inBGR(&srcImage1);
+
+		//>Read Certain Frame 2
+		if (!yuvBuffer.ReadOneFrame(fin_src2, 0))
+			return 2;
+
+		//>Transfer to Mat 2
+		yuvBuffer.getData_inBGR(&srcImage2);
+
+		//>【Test】imshow
+		//cv::imshow("输出图1;", srcImage1);
+		//cv::imshow("输出图2;", srcImage2);
+		//cv::waitKey(0);
+		sumOfPSNR += getPSNR(srcImage1, srcImage2);
+		sumOfMSSIM += getMSSIM(srcImage1, srcImage2);
+	}
+
+	std::cout << "PSNR : " << sumOfPSNR / totalFrame << std::endl;
+	std::cout << "MSSIM : " << (sumOfMSSIM[0] + sumOfMSSIM[1] + sumOfMSSIM[2]) / totalFrame << std::endl;
+
+	system("pause");
+
+#endif // PSNR_AND_MSSIM
 
 	return 0;
 }
