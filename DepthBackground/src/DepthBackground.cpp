@@ -87,8 +87,8 @@ int main(int argc, char ** argv)
 #endif // OUTPUT_COMPUTATIONAL_TIME
 
 #if SAVE_CERTAIN_PIXEL_HIST_IMAGE
-	int pixel_x = 304;
-	int pixel_y = 160;
+	int pixel_x = 208;
+	int pixel_y = 16;
 
 	//>提取特定像素点的深度，以更新步长为长度，最后一个参数为起始更新帧
 	cBackgroundEstimation.extractCertainPixelDepthMap(pixel_x, pixel_y, 0);
