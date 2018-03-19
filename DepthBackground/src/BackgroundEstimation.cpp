@@ -1,7 +1,5 @@
 #include "BackgroundEstimation.h"
 
-//using namespace std;
-
 CDepthMap::CDepthMap()
 {
 	DEPTHMAP = NULL;
@@ -117,7 +115,6 @@ CBackgroundEstimation::CBackgroundEstimation()
 	m_pcBgr = NULL;
 	m_pcDepthMap = NULL;
 }
-
 
 CBackgroundEstimation::~CBackgroundEstimation()
 {

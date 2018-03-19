@@ -6,7 +6,8 @@
 #include "BackgroundEstimation.h"
 #include "PixelHist.h"
 
-#define SAVE_CERTAIN_PIXEL_HIST_IMAGE 1
+#define SAVE_CERTAIN_PIXEL_HIST_IMAGE 0
+#define GET_DEPTH_BACKGROUND_USING_HISTOGRAM_SEGMENTATION 1
 
 int main(int argc, char ** argv)
 {
@@ -90,7 +91,7 @@ int main(int argc, char ** argv)
 	int pixel_x = 208;
 	int pixel_y = 16;
 
-	//>提取特定像素点的深度，以更新步长为长度，最后一个参数为起始更新帧
+	//>提取特定像素点的深度，以更新步长为长度，最后一个参数为起始更新帧(转换深度表格式)
 	cBackgroundEstimation.extractCertainPixelDepthMap(pixel_x, pixel_y, 0);
 
 	//>进入直方图统计模块(size,scale,updatestep)
@@ -106,10 +107,10 @@ int main(int argc, char ** argv)
 	cPixelHist.findMaxandMin();
 
 	//>显示当前深度像素点的直方图
-	cPixelHist.showHist();
+	//cPixelHist.showHist();
 
 	//>保存当前深度像素点的直方图
-	cPixelHist.writeHistImageToFile(pixel_x, pixel_y);
+	//cPixelHist.writeHistImageToFile(pixel_x, pixel_y);
 
 	std::cout << std::endl;
 #ifdef OUTPUT_COMPUTATIONAL_TIME
@@ -120,5 +121,50 @@ int main(int argc, char ** argv)
 
 #endif // SAVE_CERTAIN_PIXEL_HIST_IMAGE
 
+#ifdef GET_DEPTH_BACKGROUND_USING_HISTOGRAM_SEGMENTATION
+
+	//>声明深度背景图空间
+	cv::Mat backgroundImage(cParameter.getSourceHeight(), cParameter.getSourceWidth(), CV_8UC1);
+
+	//>开始遍历全图像
+	for (int h = 0; h < cParameter.getSourceHeight(); h++) {
+		//>定义深度图Mat类行指针
+		uchar* p_bgLine = backgroundImage.ptr<uchar>(h);
+		for (int w = 0; w < cParameter.getSourceWidth(); w++) {
+
+			//>提取特定像素点的深度，以更新步长为长度，最后一个参数为起始更新帧(转换深度表格式)
+			cBackgroundEstimation.extractCertainPixelDepthMap(w, h, 0);
+
+			//>进入直方图统计模块(size,scale,updatestep)
+			CPixelHist cPixelHist(256, 1, cParameter.getUpdateStep());
+
+			//>计算当前深度像素点的直方图
+			cPixelHist.calcHist(cBackgroundEstimation.getCertainPixelDepthMapBuffer());
+
+			//>判断是否只有一个峰，如果有且只有一个峰，则此像素点的背景深度值即为该峰对应的深度值
+			if (cPixelHist.isOnlyOneBar()) {
+				p_bgLine[w] = cPixelHist.getDepthValueTag();
+				continue;
+			}
+
+			//>测试最大值最小值
+			cPixelHist.findMaxandMin();
+
+			//如果最高峰频次（高度）小于N/5，则此像素点的背景深度值赋值为0
+			if (cPixelHist.getMaxBarValue() < cParameter.getUpdateStep()) {
+				p_bgLine[w] = 0;
+				continue;
+			}
+
+			//>从直方图最左边开始向右边遍历，记录第一个峰值大于或等于最高峰频次1/4的峰，作为深度值最低的主峰
+			p_bgLine[w] = cPixelHist.getBackgroundMainPeek();
+		}
+	}
+
+	//>测试提取的深度背景图
+	cv::imshow("背景深度图;", backgroundImage);
+	cv::waitKey(0);
+
+#endif // GET_DEPTH_BACKGROUND_USING_HISTOGRAM_SEGMENTATION
 	return 1;
 }

@@ -19,6 +19,8 @@ CPixelHist::CPixelHist(int size, int scale, int frame)
 	for (int i = 0; i < 255; i++)
 		m_iBarValue[i] = 0;
 
+	m_idepthValue = 0;
+
 	m_pcHistImage = new cv::Mat(m_iSize * m_iScale, m_iSize, CV_8U, cv::Scalar(0));
 }
 
@@ -49,9 +51,9 @@ void CPixelHist::findMaxandMin()
 			m_iMinValue = m_iBarValue[i];
 	}
 
-	std::cout << std::endl;
-	std::cout << "MaxValue: " << m_iMaxValue << std::endl;
-	std::cout << "MinValue: " << m_iMinValue << std::endl;
+	//std::cout << std::endl;
+	//std::cout << "MaxValue: " << m_iMaxValue << std::endl;
+	//std::cout << "MinValue: " << m_iMinValue << std::endl;
 
 }
 
@@ -67,7 +69,7 @@ void CPixelHist::calcHist(unsigned char * pBuffer)
 		m_iBarValue[(int)pBuffer[i]]++;
 
 	//>Test to output the BarValue
-	showFrequency();
+	//showFrequency();
 }
 
 void CPixelHist::showHist()
@@ -105,4 +107,29 @@ void CPixelHist::writeHistImageToFile(int x, int y)
 	outFileName += ").png";
 
 	cv::imwrite(outFileName, *m_pcHistImage);
+}
+
+bool CPixelHist::isOnlyOneBar()
+{
+	int sum = 0;
+	m_idepthValue = 0;
+	for (int i = 0; i < 255; i++) {
+		if (m_iBarValue[i] != 0) {
+			sum++;
+			m_idepthValue = i;
+		}
+	}
+	if (sum == 1)
+		return true;
+	return false;
+}
+
+int CPixelHist::getBackgroundMainPeek()
+{
+	m_idepthValue = 0;
+	for (int i = 0; i < 255; i++) {
+		if (m_iBarValue[i] >= m_iMaxValue / 4)
+			m_idepthValue = i;
+	}
+	return m_idepthValue;
 }
