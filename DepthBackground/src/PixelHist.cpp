@@ -128,8 +128,10 @@ int CPixelHist::getBackgroundMainPeek()
 {
 	m_idepthValue = 0;
 	for (int i = 0; i < 255; i++) {
-		if (m_iBarValue[i] >= m_iMaxValue / 4)
+		if (m_iBarValue[i] >= m_iMaxValue / 8) {
 			m_idepthValue = i;
+			break;
+		}
 	}
 	return m_idepthValue;
 }

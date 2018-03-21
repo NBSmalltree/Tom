@@ -23,14 +23,15 @@ int main(int argc, char ** argv)
 
 	ParameterViewSyn cParameter;
 	CBackgroundEstimation cBackgroundEstimation;
-	FILE *fin;
+	FILE *fin_depth, *fin_color;
 
 	if (cParameter.Init(argc, argv) != 1) return 0;
 	std::cout << std::endl;
 
 	if (!cBackgroundEstimation.Init(cParameter)) return 2;
 
-	if (fopen_s(&fin, cParameter.getVideoName().c_str(), "rb")) {
+	if (fopen_s(&fin_depth, cParameter.getDepthVideoName().c_str(), "rb")||
+		fopen_s(&fin_color, cParameter.getColorVideoName().c_str(), "rb")) {
 		std::cout << "Can't Open Input Video File(s)" << std::endl;
 		return 3;
 	}
@@ -46,7 +47,7 @@ int main(int argc, char ** argv)
 		std::cout << "Frame number = " << n << std::endl;
 		std::cout << "Start Processing:";
 
-		if (!cBackgroundEstimation.getFrameBuffer()->ReadOneFrame(fin, n)) {
+		if (!cBackgroundEstimation.getFrameBuffer()->ReadOneFrame(fin_depth, n)) {
 			std::cout << "Set Frame Head Failure!" << std::endl;
 			break;
 		}
@@ -88,8 +89,8 @@ int main(int argc, char ** argv)
 #endif // OUTPUT_COMPUTATIONAL_TIME
 
 #if SAVE_CERTAIN_PIXEL_HIST_IMAGE
-	int pixel_x = 208;
-	int pixel_y = 16;
+	int pixel_x = 336;
+	int pixel_y = 128;
 
 	//>提取特定像素点的深度，以更新步长为长度，最后一个参数为起始更新帧(转换深度表格式)
 	cBackgroundEstimation.extractCertainPixelDepthMap(pixel_x, pixel_y, 0);
@@ -107,7 +108,7 @@ int main(int argc, char ** argv)
 	cPixelHist.findMaxandMin();
 
 	//>显示当前深度像素点的直方图
-	//cPixelHist.showHist();
+	cPixelHist.showHist();
 
 	//>保存当前深度像素点的直方图
 	//cPixelHist.writeHistImageToFile(pixel_x, pixel_y);
@@ -121,7 +122,7 @@ int main(int argc, char ** argv)
 
 #endif // SAVE_CERTAIN_PIXEL_HIST_IMAGE
 
-#ifdef GET_DEPTH_BACKGROUND_USING_HISTOGRAM_SEGMENTATION
+#if GET_DEPTH_BACKGROUND_USING_HISTOGRAM_SEGMENTATION
 
 	//>声明深度背景图空间
 	cv::Mat backgroundImage(cParameter.getSourceHeight(), cParameter.getSourceWidth(), CV_8UC1);
@@ -150,18 +151,26 @@ int main(int argc, char ** argv)
 			//>测试最大值最小值
 			cPixelHist.findMaxandMin();
 
-			//如果最高峰频次（高度）小于N/5，则此像素点的背景深度值赋值为0
-			if (cPixelHist.getMaxBarValue() < cParameter.getUpdateStep()) {
+			//如果最高峰频次（高度）小于N/5，则此像素点的背景深度值赋值为0【参数3、4间调整】
+			if (cPixelHist.getMaxBarValue() < cParameter.getUpdateStep() / 3) {
 				p_bgLine[w] = 0;
 				continue;
 			}
 
-			//>从直方图最左边开始向右边遍历，记录第一个峰值大于或等于最高峰频次1/4的峰，作为深度值最低的主峰
+			//>从直方图最左边开始向右边遍历，记录第一个峰值大于或等于最高峰频次1/8的峰，作为深度值最低的主峰
 			p_bgLine[w] = cPixelHist.getBackgroundMainPeek();
 		}
 	}
 
+	std::cout << std::endl;
+#ifdef OUTPUT_COMPUTATIONAL_TIME
+	finish = clock();
+	std::cout << std::setprecision(4) << "The Process Of Get Depth Background : " << (double)(finish - start) / CLOCKS_PER_SEC << 's' << std::endl;
+	start = clock();
+#endif // OUTPUT_COMPUTATIONAL_TIME
+
 	//>测试提取的深度背景图
+	cv::imwrite("背景深度图.png", backgroundImage);
 	cv::imshow("背景深度图;", backgroundImage);
 	cv::waitKey(0);
 

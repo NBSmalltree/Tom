@@ -17,7 +17,8 @@ public:
 	int getTotalFrame() { return m_uiNumberOfFrames; }
 	int getUpdateStep() { return m_uiUpdateStep; }
 
-	std::string getVideoName() { return m_cVideoName; }
+	std::string getDepthVideoName() { return m_cDepthVideoName; }
+	std::string getColorVideoName() { return m_cColorVideoName; }
 
 private:
 	UInt setup();
@@ -29,7 +30,8 @@ protected:
 	int m_uiNumberOfFrames;
 	int m_uiUpdateStep;
 
-	std::string m_cVideoName;
+	std::string m_cDepthVideoName;
+	std::string m_cColorVideoName;
 
 	std::string m_cOutputBackgroundImageName;
 
