@@ -1,186 +1,185 @@
-#include <iostream>
-#include <iomanip>
-#include <ctime>
-#include "version.h"
-#include "ParameterViewSyn.h"
-#include "BackgroundEstimation.h"
-#include "PixelHist.h"
+#include "DepthBackground.h"
 
-#define SAVE_CERTAIN_PIXEL_HIST_IMAGE 1
-#define GET_DEPTH_BACKGROUND_USING_HISTOGRAM_SEGMENTATION 0
-#define GET_COLOR_BACKGROUND 0
-
-int main(int argc, char ** argv)
+CDepthMap::CDepthMap()
 {
-	std::cout.setf(std::ios::fixed);
-	std::cout << "This is DepthBackground Process" << std::endl;
-	std::cout << "Author : Tom Rubin" << std::endl;
-	std::cout << std::setprecision(1) << "Version : " << VERSION << std::endl << std::endl;
+	DEPTHMAP = NULL;
+	pBuffer = NULL;
+}
 
-#ifdef OUTPUT_COMPUTATIONAL_TIME
-	clock_t start, finish, first;
-	first = start = clock();
-#endif // OUTPUT_COMPUTATIONAL_TIME
+CDepthMap::CDepthMap(int h, int w, int step)
+{
+	m_iHeight = h;
+	m_iWidth = w;
+	m_iUpdateStep = step;
 
-	ParameterViewSyn cParameter;
-	CBackgroundEstimation cBackgroundEstimation;
-	FILE *fin_depth, *fin_color;
-
-	if (cParameter.Init(argc, argv) != 1) return 0;
-	std::cout << std::endl;
-
-	if (!cBackgroundEstimation.Init(cParameter)) return 2;
-
-	if (fopen_s(&fin_depth, cParameter.getDepthVideoName().c_str(), "rb")||
-		fopen_s(&fin_color, cParameter.getColorVideoName().c_str(), "rb")) {
-		std::cout << "Can't Open Input Video File(s)" << std::endl;
-		return 3;
+	if (!allocate_mem()) {
+		m_iHeight = m_iWidth = m_iUpdateStep = 0;
+		DEPTHMAP = NULL;
+		pBuffer = NULL;
 	}
+}
 
-#ifdef OUTPUT_COMPUTATIONAL_TIME
-	finish = clock();
-	std::cout << std::setprecision(4) << "Initialization : " << (double)(finish - start) / CLOCKS_PER_SEC << 's' << std::endl;
-	start = clock();
-#endif // OUTPUT_COMPUTATIONAL_TIME
+CDepthMap::~CDepthMap()
+{
+	release_mem();
+}
 
-	//>将深度图信息读入数组
-	for (int n = cParameter.getStartFrame(); n < cParameter.getStartFrame() + cParameter.getTotalFrame(); n++) {
-		std::cout << "Frame number = " << n << std::endl;
-		std::cout << "Start Processing:";
+bool CDepthMap::allocate_mem()
+{
+	int h, pos;
+	BYTE *buf1D;
+	BYTE **buf2D;
 
-		if (!cBackgroundEstimation.getFrameBuffer()->ReadOneFrame(fin_depth, n)) {
-			std::cout << "Set Frame Head Failure!" << std::endl;
-			break;
+	release_mem();
+
+	if ((buf1D = (unsigned char *)malloc(m_iHeight * m_iWidth * m_iUpdateStep * sizeof(BYTE))) == NULL) return false;
+
+	if ((buf2D = (BYTE **)malloc(m_iUpdateStep * sizeof(BYTE *))) == NULL) {
+		free(buf1D);
+		return false;
+	}
+	memset(buf1D, 0, m_iHeight * m_iWidth * m_iUpdateStep);
+
+	DEPTHMAP = buf2D;
+	for (h = pos = 0; h < m_iUpdateStep; h++, pos += m_iHeight * m_iWidth)
+		DEPTHMAP[h] = &(buf1D[pos]);
+
+	pBuffer = DEPTHMAP[0]; // buf1D;
+
+	return true;
+}
+
+void CDepthMap::release_mem()
+{
+	if (DEPTHMAP != NULL) {
+		if (DEPTHMAP[0] != NULL) free(DEPTHMAP[0]);
+		free(DEPTHMAP);
+		DEPTHMAP = NULL;
+		pBuffer = NULL;
+	}
+}
+
+void CDepthMap::printTestMemory(int rowstart, int colstart, int width, int frame)
+{
+	std::cout << std::endl << "This is Test Memory for Check : " << std::endl;
+
+	std::cout << "Frame: " << frame << std::endl;
+	//for (int k = 0; k <= frame; k++) {
+	for (int i = rowstart; i < rowstart + width; i++)
+	{
+		for (int j = colstart; j < colstart + width; j++)
+		{
+			std::cout << (int)DEPTHMAP[frame][i*m_iWidth + j] << ' ';
 		}
-		std::cout << '.';
-
-		//>【Test】:中间过程的保存及显示
-		/*cBackgroundEstimation.getFrameBuffer()->getData_inBGR(cBackgroundEstimation.getBgrBuffer());
-
-		if (!cBackgroundEstimation.writeCurrentImage()) {
-			std::cout << "Write Current Image Failure!" << std::endl;
-			break;
-		}
-		std::cout << "Write Current Image Success!" << std::endl;
-
-		cBackgroundEstimation.showCurrentImage();*/
-
-		//>将当前帧亮度信息保存到深度图数据结构中
-		if (!cBackgroundEstimation.writeOneDepthMap(cBackgroundEstimation.getFrameBuffer(), n)) {
-			std::cout << "Current Frame Depth Map Save Failure!" << std::endl;
-			break;
-		}
-		std::cout << '.';
-
-		//>【Test】:(x,y)=(256,144)宏块的深度值保存
-		//cBackgroundEstimation.showDepthMapTestMemory(144, 256, 15, n);
-
-		//>【Test】:写入一个特定的像素值到文件
-		//cBackgroundEstimation.writeOnePixeltoFile(304, 160, n);
-
 		std::cout << std::endl;
-		//system("pause");
-	}//>完成深度图信息保存
+	}
+	//}
 
-	std::cout << std::endl;
-#ifdef OUTPUT_COMPUTATIONAL_TIME
-	finish = clock();
-	std::cout << std::setprecision(4) << "Store All The Depth Map Duration : " << (double)(finish - start) / CLOCKS_PER_SEC << 's' << std::endl;
-	start = clock();
-#endif // OUTPUT_COMPUTATIONAL_TIME
+}
 
-#if SAVE_CERTAIN_PIXEL_HIST_IMAGE
-	int pixel_x = 336;
-	int pixel_y = 128;
+bool CDepthMap::saveOneFrame(CIYuv *yuvBuffer, int n)
+{
+	if (yuvBuffer == NULL || DEPTHMAP[n] == NULL) return false;
 
-	//>提取特定像素点的深度，以更新步长为长度，最后一个参数为起始更新帧(转换深度表格式)
-	cBackgroundEstimation.extractCertainPixelDepthMap(pixel_x, pixel_y, 0);
-
-	//>进入直方图统计模块(size,scale,updatestep)
-	CPixelHist cPixelHist(256, 1, 100);
-
-	//>测试直方图模块的输入数据
-	//cPixelHist.printInputData(cBackgroundEstimation.getCertainPixelDepthMapBuffer());
-
-	//>计算当前深度像素点的直方图
-	cPixelHist.calcHist(cBackgroundEstimation.getCertainPixelDepthMapBuffer());
-
-	//>测试最大值最小值
-	cPixelHist.findMaxandMin();
-
-	//>显示当前深度像素点的直方图
-	cPixelHist.showHist();
-
-	//>保存当前深度像素点的直方图
-	//cPixelHist.writeHistImageToFile(pixel_x, pixel_y);
-
-	std::cout << std::endl;
-#ifdef OUTPUT_COMPUTATIONAL_TIME
-	finish = clock();
-	std::cout << std::setprecision(4) << "The Process Of One Pixel : " << (double)(finish - start) / CLOCKS_PER_SEC << 's' << std::endl;
-	start = clock();
-#endif // OUTPUT_COMPUTATIONAL_TIME
-
-#endif // SAVE_CERTAIN_PIXEL_HIST_IMAGE
-
-#if GET_DEPTH_BACKGROUND_USING_HISTOGRAM_SEGMENTATION
-
-	//>声明深度背景图空间
-	cv::Mat backgroundImage(cParameter.getSourceHeight(), cParameter.getSourceWidth(), CV_8UC1);
-
-	//>开始遍历全图像
-	for (int h = 0; h < cParameter.getSourceHeight(); h++) {
-		//>定义深度图Mat类行指针
-		uchar* p_bgLine = backgroundImage.ptr<uchar>(h);
-		for (int w = 0; w < cParameter.getSourceWidth(); w++) {
-
-			//>提取特定像素点的深度，以更新步长为长度，最后一个参数为起始更新帧(转换深度表格式)
-			cBackgroundEstimation.extractCertainPixelDepthMap(w, h, 0);
-
-			//>进入直方图统计模块(size,scale,updatestep)
-			CPixelHist cPixelHist(256, 1, cParameter.getUpdateStep());
-
-			//>计算当前深度像素点的直方图
-			cPixelHist.calcHist(cBackgroundEstimation.getCertainPixelDepthMapBuffer());
-
-			//>判断是否只有一个峰，如果有且只有一个峰，则此像素点的背景深度值即为该峰对应的深度值
-			if (cPixelHist.isOnlyOneBar()) {
-				p_bgLine[w] = cPixelHist.getDepthValueTag();
-				continue;
-			}
-
-			//>测试最大值最小值
-			cPixelHist.findMaxandMin();
-
-			//如果最高峰频次（高度）小于N/5，则此像素点的背景深度值赋值为0【参数3、4间调整】
-			if (cPixelHist.getMaxBarValue() < cParameter.getUpdateStep() / 3) {
-				p_bgLine[w] = 0;
-				continue;
-			}
-
-			//>从直方图最左边开始向右边遍历，记录第一个峰值大于或等于最高峰频次1/8的峰，作为深度值最低的主峰
-			p_bgLine[w] = cPixelHist.getBackgroundMainPeek();
+	for (int i = 0; i < m_iHeight; i++)
+	{
+		for (int j = 0; j < m_iWidth; j++)
+		{
+			DEPTHMAP[n][i*m_iWidth + j] = yuvBuffer->Y[i][j];
 		}
 	}
 
-	//>测试提取的深度背景图
-	cv::imwrite(cParameter.getDepthBackgroundImageName(), backgroundImage);
-	//cv::imshow("背景深度图;", backgroundImage);
-	//cv::waitKey(0);
+	return true;
+}
 
-	std::cout << std::endl;
-#ifdef OUTPUT_COMPUTATIONAL_TIME
-	finish = clock();
-	std::cout << std::setprecision(4) << "The Process Of Get Depth Background : " << (double)(finish - start) / CLOCKS_PER_SEC << 's' << std::endl;
-	start = clock();
-#endif // OUTPUT_COMPUTATIONAL_TIME
+void CDepthMap::writeOnePixeltoFile(int x, int y, int frame)
+{
+	std::string testFileName = "TestPixel_(";
+	testFileName += std::to_string(x);
+	testFileName += ',';
+	testFileName += std::to_string(y);
+	testFileName += ").txt";
 
-#endif // GET_DEPTH_BACKGROUND_USING_HISTOGRAM_SEGMENTATION
+	std::ofstream outf;
+	outf.open(testFileName, std::ios::app);
 
-#if GET_COLOR_BACKGROUND
+	outf << (int)DEPTHMAP[frame][y*m_iWidth + x] << ' ';
+
+	outf.close();
+}
 
 
+CDepthBackground::CDepthBackground()
+{
+	m_pcVideo = NULL;
+	m_pcBgr = NULL;
+	m_pcDepthMap = NULL;
+	m_pcCertainPixelDepthMap = NULL;
+}
 
-#endif // GET_COLOR_BACKGROUND
-	return 1;
+CDepthBackground::~CDepthBackground()
+{
+	if (m_pcVideo != NULL) delete m_pcVideo;
+	if (m_pcBgr != NULL) delete m_pcBgr;
+	if (m_pcDepthMap != NULL) delete m_pcDepthMap;
+	if (m_pcCertainPixelDepthMap != NULL) delete m_pcCertainPixelDepthMap;
+}
+
+bool CDepthBackground::allocateMem()
+{
+	m_pcVideo = new CIYuv(m_iHeight, m_iWidth, 420);
+
+	m_pcBgr = new cv::Mat(m_iHeight, m_iWidth, CV_8UC3);
+
+	m_pcDepthMap = new CDepthMap(m_iHeight, m_iWidth, m_iUpdateStep);
+	//m_pcDepthMap->printTestMemory();
+
+	if ((m_pcCertainPixelDepthMap = (BYTE *)malloc(m_iUpdateStep * sizeof(BYTE))) == NULL) return false;
+	memset(m_pcCertainPixelDepthMap, 0, m_iUpdateStep);
+
+	return true;
+}
+
+void CDepthBackground::showCurrentImage()
+{
+	cv::imshow("当前帧图像;", *m_pcBgr);
+	cv::waitKey(0);
+}
+
+bool CDepthBackground::writeCurrentImage()
+{
+	//写入配置;
+	std::vector<int>compression_params;
+	compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
+	compression_params.push_back(9);
+
+	if (!imwrite("test.png", *m_pcBgr)) return false;
+
+	return true;
+}
+
+void CDepthBackground::showDepthMapTestMemory(int rowstart, int colstart, int width, int frame)
+{
+	m_pcDepthMap->printTestMemory(rowstart, colstart, width, frame);
+}
+
+bool CDepthBackground::saveOneDepthMap(CIYuv *yuvBuffer, int n)
+{
+	return m_pcDepthMap->saveOneFrame(yuvBuffer, n);
+}
+
+void CDepthBackground::writeOnePixeltoFile(int x, int y, int frame)
+{
+	m_pcDepthMap->writeOnePixeltoFile(x, y, frame);
+}
+
+void CDepthBackground::extractCertainPixelDepthMap(int x, int y, int startframe)
+{
+	int i;
+
+	for (i = 0; i < m_iUpdateStep; i++)
+		m_pcCertainPixelDepthMap[i] = 0;
+
+	for (i = 0; i < m_iUpdateStep; i++)
+		m_pcCertainPixelDepthMap[i] = m_pcDepthMap->DEPTHMAP[startframe + i][y*m_iWidth + x];
 }

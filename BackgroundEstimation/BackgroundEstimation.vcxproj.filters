@@ -24,16 +24,16 @@
     <ClCompile Include="src\ParameterViewSyn.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="src\BackgroundEstimation.cpp">
+    <ClCompile Include="src\Process.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="src\DepthBackground.cpp">
+    <ClCompile Include="src\BackgroundEst.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="src\PixelHist.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="src\DepthSegmentation.cpp">
+    <ClCompile Include="src\DepthBackground.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -47,7 +47,7 @@
     <ClInclude Include="include\ParameterViewSyn.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="include\BackgroundEstimation.h">
+    <ClInclude Include="include\Process.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="include\version.h">
@@ -56,7 +56,7 @@
     <ClInclude Include="include\PixelHist.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="include\DepthSegmentation.h">
+    <ClInclude Include="include\DepthBackground.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

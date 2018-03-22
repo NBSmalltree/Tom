@@ -1,10 +1,5 @@
-#ifndef BackgroundEstimation_h__
-#define BackgroundEstimation_h__
-
-#include <opencv2/highgui/highgui.hpp>
 #include <iostream>
 #include <fstream>
-#include "ParameterViewSyn.h"
 #include "yuv.h"
 
 class CDepthMap
@@ -16,10 +11,10 @@ public:
 
 	BYTE **DEPTHMAP;
 
+	bool saveOneFrame(CIYuv *yuvBuffer, int n);
+
+	//>¡¾Test¡¿
 	void printTestMemory(int rowstart, int colstart, int width, int frame);
-
-	bool writeOneFrame(CIYuv *yuvBuffer, int n);
-
 	void writeOnePixeltoFile(int x, int y, int frame);
 
 private:
@@ -33,35 +28,39 @@ private:
 	BYTE *pBuffer;  //!> 1D array for the DEPTHMAP
 };
 
-class CBackgroundEstimation
+class CDepthBackground
 {
 public:
-	CBackgroundEstimation();
-	~CBackgroundEstimation();
+	CDepthBackground();
+	~CDepthBackground();
 
-	bool Init(ParameterViewSyn cParameter);
+	void setWidth(int sWidth) { m_iWidth = sWidth; }
+	void setHeight(int sHeight) { m_iHeight = sHeight; }
+	void setStartFrame(int sStartFrame) { m_iStartFrame = sStartFrame; }
+	void setTotalFrame(int sTotalFrame) { m_iTotalFrame = sTotalFrame; }
+	void setUpdateStep(int sUpdateStep) { m_iUpdateStep = sUpdateStep; }
+
+	bool allocateMem();
 
 	CIYuv* getFrameBuffer() { return m_pcVideo; }
 	cv::Mat* getBgrBuffer() { return m_pcBgr; }
 	CDepthMap* getDepthMapBuffer() { return m_pcDepthMap; }
 	BYTE* getCertainPixelDepthMapBuffer() { return m_pcCertainPixelDepthMap; }
 
+	bool saveOneDepthMap(CIYuv *yuvBuffer, int n);
+	void extractCertainPixelDepthMap(int x, int y, int startframe);
+
+	//>¡¾Test¡¿
 	void showCurrentImage();
 	bool writeCurrentImage();
-
 	void showDepthMapTestMemory(int rowstart, int colstart, int width, int frame);
-
-	bool writeOneDepthMap(CIYuv *yuvBuffer, int n); 
-
 	void writeOnePixeltoFile(int x, int y, int frame);
-
-	void extractCertainPixelDepthMap(int x, int y, int startframe);
 
 private:
 	int m_iWidth;
 	int m_iHeight;
-	int m_iFrameNumber;
-	int m_iTotalNumber;
+	int m_iStartFrame;
+	int m_iTotalFrame;
 	int m_iUpdateStep;
 
 	CIYuv *m_pcVideo;
@@ -69,7 +68,6 @@ private:
 	CDepthMap *m_pcDepthMap;
 
 	BYTE *m_pcCertainPixelDepthMap;
-	
+
 };
-#endif // BackgroundEstimation_h__
 

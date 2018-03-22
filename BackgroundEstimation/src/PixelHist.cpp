@@ -1,7 +1,6 @@
 #include "PixelHist.h"
 
 
-
 CPixelHist::CPixelHist()
 {
 	m_pcHistImage = NULL;
@@ -32,7 +31,7 @@ CPixelHist::~CPixelHist()
 
 void CPixelHist::printInputData(unsigned char * pBuffer)
 {
-	std::cout << std::endl << "This is Hist Input Data Get Test!" << std::endl;
+	std::cout << std::endl << "This is Hist Input Data Get Test : " << std::endl;
 
 	for (int i = 0; i < m_iTotalFrame; i++)
 		std::cout << (int)pBuffer[i] << ' ';
