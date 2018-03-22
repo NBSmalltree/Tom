@@ -76,8 +76,6 @@ $RECYCLE.BIN/
 *.msp
 
 # visual studio 2015 com
-*.filters
-*.user
 *.db
 *.ipch
 *.opensdf
