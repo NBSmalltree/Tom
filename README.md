@@ -2,7 +2,7 @@
 
 This is a collection of my daily projects, which are organized in separate files. The propose of each project states as following.
 
-## DepthBackground
+## BackgroundEstimation
 
 Estimate the background through Depth Map, which considers the object distance to camera.
 
