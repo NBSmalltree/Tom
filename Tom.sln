@@ -15,7 +15,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "YUV_Test", "YUV_Test\YUV_Te
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ReadTest", "ReadTest\ReadTest.vcxproj", "{A9E7FA7B-76F0-4BA4-B84F-87016FC65DDE}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DepthBackground", "DepthBackground\DepthBackground.vcxproj", "{3E70965B-D2CD-482C-A96F-3107CFBBA688}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BackgroundEstimation", "BackgroundEstimation\BackgroundEstimation.vcxproj", "{3E70965B-D2CD-482C-A96F-3107CFBBA688}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

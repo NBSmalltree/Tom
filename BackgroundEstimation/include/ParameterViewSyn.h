@@ -19,6 +19,8 @@ public:
 
 	std::string getDepthVideoName() { return m_cDepthVideoName; }
 	std::string getColorVideoName() { return m_cColorVideoName; }
+	std::string getDepthBackgroundImageName() { return m_cDepthBackgroundImageName; }
+	std::string getColorBackgroundImageName() { return m_cColorBackgroundImageName; }
 
 private:
 	UInt setup();
@@ -33,7 +35,8 @@ protected:
 	std::string m_cDepthVideoName;
 	std::string m_cColorVideoName;
 
-	std::string m_cOutputBackgroundImageName;
+	std::string m_cDepthBackgroundImageName;
+	std::string m_cColorBackgroundImageName;
 
 };
 

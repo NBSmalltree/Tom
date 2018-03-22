@@ -38,9 +38,10 @@ UInt ParameterViewSyn::setup()
 	m_pCfgLines[uiParLnCount++] = new ConfigLineInt("StartFrame", &m_uiStartFrame, 0);
 	m_pCfgLines[uiParLnCount++] = new ConfigLineInt("UpdateStep", &m_uiUpdateStep, 100);
 
-	m_pCfgLines[uiParLnCount++] = new ConfigLineStr("DepthVideoName", &m_cDepthVideoName, "depth_book_9.yuv");
-	m_pCfgLines[uiParLnCount++] = new ConfigLineStr("ColorVideoName", &m_cColorVideoName, "bookarrival_9.yuv");
-	m_pCfgLines[uiParLnCount++] = new ConfigLineStr("OutputBackgroundImageName", &m_cOutputBackgroundImageName, "view8_depthbackground.bmp");
+	m_pCfgLines[uiParLnCount++] = new ConfigLineStr("DepthVideoName", &m_cDepthVideoName, "depth_test.yuv");
+	m_pCfgLines[uiParLnCount++] = new ConfigLineStr("ColorVideoName", &m_cColorVideoName, "color_test.yuv");
+	m_pCfgLines[uiParLnCount++] = new ConfigLineStr("OutputDepthBackgroundImageName", &m_cDepthBackgroundImageName, "depthbackground_test.bmp");
+	m_pCfgLines[uiParLnCount++] = new ConfigLineStr("OutputColorBackgroundImageName", &m_cColorBackgroundImageName, "colorbackground_test.bmp");
 
 	m_pCfgLines[uiParLnCount] = NULL;
 

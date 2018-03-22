@@ -21,8 +21,9 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{3E70965B-D2CD-482C-A96F-3107CFBBA688}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>DepthBackground</RootNamespace>
+    <RootNamespace>BackgroundEstimation</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <ProjectName>BackgroundEstimation</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -150,6 +151,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\DepthSegmentation.cpp" />
     <ClCompile Include="src\BackgroundEstimation.cpp" />
     <ClCompile Include="src\DepthBackground.cpp" />
     <ClCompile Include="src\ParameterBase.cpp" />
@@ -158,6 +160,7 @@
     <ClCompile Include="src\yuv.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\DepthSegmentation.h" />
     <ClInclude Include="include\BackgroundEstimation.h" />
     <ClInclude Include="include\ParameterBase.h" />
     <ClInclude Include="include\ParameterViewSyn.h" />

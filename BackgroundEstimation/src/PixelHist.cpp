@@ -26,6 +26,7 @@ CPixelHist::CPixelHist(int size, int scale, int frame)
 
 CPixelHist::~CPixelHist()
 {
+	m_pcHistImage->release();
 	if (m_pcHistImage != NULL) delete m_pcHistImage;
 }
 

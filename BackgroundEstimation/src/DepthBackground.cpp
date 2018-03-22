@@ -6,8 +6,9 @@
 #include "BackgroundEstimation.h"
 #include "PixelHist.h"
 
-#define SAVE_CERTAIN_PIXEL_HIST_IMAGE 0
-#define GET_DEPTH_BACKGROUND_USING_HISTOGRAM_SEGMENTATION 1
+#define SAVE_CERTAIN_PIXEL_HIST_IMAGE 1
+#define GET_DEPTH_BACKGROUND_USING_HISTOGRAM_SEGMENTATION 0
+#define GET_COLOR_BACKGROUND 0
 
 int main(int argc, char ** argv)
 {
@@ -162,6 +163,11 @@ int main(int argc, char ** argv)
 		}
 	}
 
+	//>测试提取的深度背景图
+	cv::imwrite(cParameter.getDepthBackgroundImageName(), backgroundImage);
+	//cv::imshow("背景深度图;", backgroundImage);
+	//cv::waitKey(0);
+
 	std::cout << std::endl;
 #ifdef OUTPUT_COMPUTATIONAL_TIME
 	finish = clock();
@@ -169,11 +175,12 @@ int main(int argc, char ** argv)
 	start = clock();
 #endif // OUTPUT_COMPUTATIONAL_TIME
 
-	//>测试提取的深度背景图
-	cv::imwrite("背景深度图.png", backgroundImage);
-	cv::imshow("背景深度图;", backgroundImage);
-	cv::waitKey(0);
-
 #endif // GET_DEPTH_BACKGROUND_USING_HISTOGRAM_SEGMENTATION
+
+#if GET_COLOR_BACKGROUND
+
+
+
+#endif // GET_COLOR_BACKGROUND
 	return 1;
 }

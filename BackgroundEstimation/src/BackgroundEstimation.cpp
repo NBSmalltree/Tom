@@ -121,6 +121,7 @@ CBackgroundEstimation::~CBackgroundEstimation()
 	if (m_pcVideo != NULL) delete m_pcVideo;
 	if (m_pcBgr != NULL) delete m_pcBgr;
 	if (m_pcDepthMap != NULL) delete m_pcDepthMap;
+	if (m_pcCertainPixelDepthMap != NULL) delete m_pcCertainPixelDepthMap;
 }
 
 bool CBackgroundEstimation::Init(ParameterViewSyn cParameter)
@@ -138,8 +139,8 @@ bool CBackgroundEstimation::Init(ParameterViewSyn cParameter)
 	m_pcDepthMap = new CDepthMap(m_iHeight, m_iWidth, m_iUpdateStep);
 	//m_pcDepthMap->printTestMemory();
 
-	if ((m_pcCertainPixelDepthMap = (BYTE *)malloc(m_iHeight * m_iWidth * sizeof(BYTE))) == NULL) return false;
-	memset(m_pcCertainPixelDepthMap, 0, m_iHeight * m_iWidth);
+	if ((m_pcCertainPixelDepthMap = (BYTE *)malloc(m_iUpdateStep * sizeof(BYTE))) == NULL) return false;
+	memset(m_pcCertainPixelDepthMap, 0, m_iUpdateStep);
 
 	return true;
 }
