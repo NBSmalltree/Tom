@@ -14,10 +14,13 @@ CBackgroundEstimation::CBackgroundEstimation()
 
 CBackgroundEstimation::~CBackgroundEstimation()
 {
-	fclose(fin_depth);
-	//fclose(fin_color);
+	if(fin_depth)
+		fclose(fin_depth);
+	if (fin_color)
+		fclose(fin_color);
 
 	if (m_pDepthBackground != NULL) delete m_pDepthBackground;
+	if (m_pColorBackground != NULL) delete m_pColorBackground;
 
 	if (m_pDepthBackgroundImage != NULL) {
 		m_pDepthBackgroundImage->release();
@@ -53,6 +56,28 @@ bool CBackgroundEstimation::initDepthBackground()
 		return false;
 
 	if (fopen_s(&fin_depth, m_cDepthVideoName.c_str(), "rb"))
+		return false;
+
+	return true;
+}
+
+bool CBackgroundEstimation::initColorBackground()
+{
+	m_pColorBackground = new CColorBackground();
+
+	m_pColorBackground->setWidth(m_iWidth);
+	m_pColorBackground->setHeight(m_iHeight);
+	m_pColorBackground->setStartFrame(m_iStartFrame);
+	m_pColorBackground->setTotalFrame(m_iTotalFrame);
+	m_pColorBackground->setUpdateStep(m_iUpdateStep);
+	m_pColorBackground->setRange(50);
+	
+
+	if (!m_pColorBackground->allocateMem())
+		return false;
+
+	if (fopen_s(&fin_depth, m_cDepthVideoName.c_str(), "rb")||
+		fopen_s(&fin_color, m_cColorVideoName.c_str(), "rb"))
 		return false;
 
 	return true;
@@ -114,13 +139,6 @@ void CBackgroundEstimation::calcOnePixelHist(int x, int y)
 	//>测试最大值最小值
 	cPixelHist.findMaxandMin();
 
-	std::cout << std::endl;
-#ifdef OUTPUT_COMPUTATIONAL_TIME
-	finish = clock();
-	std::cout << std::setprecision(4) << "The Process Of One Pixel : " << (double)(finish - start) / CLOCKS_PER_SEC << 's' << std::endl;
-	start = clock();
-#endif // OUTPUT_COMPUTATIONAL_TIME
-
 	//>显示当前深度像素点的直方图
 	cPixelHist.showHist();
 
@@ -168,16 +186,57 @@ void CBackgroundEstimation::calcHist()
 		}
 	}//>全图像遍历完成
 
-	
-#ifdef OUTPUT_COMPUTATIONAL_TIME
-	std::cout << std::endl;
-	finish = clock();
-	std::cout << std::setprecision(4) << "The Process Of Get Depth Background : " << (double)(finish - start) / CLOCKS_PER_SEC << 's' << std::endl;
-	start = clock();
-#endif // OUTPUT_COMPUTATIONAL_TIME
-
 	//>测试提取的深度背景图
+	//写入配置;
+	std::vector<int>compression_params;
+	compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
+	compression_params.push_back(9);
 	cv::imwrite(m_cDepthBackgroundImageName, *m_pDepthBackgroundImage);
-	cv::imshow("背景深度图;", *m_pDepthBackgroundImage);
-	cv::waitKey(0);
+	//cv::imshow("背景深度图;", *m_pDepthBackgroundImage);
+	//cv::waitKey(0);
+}
+
+bool CBackgroundEstimation::calcColorBackground()
+{
+	std::cout << "Start to Calculate Color Background :" << std::endl;
+
+	//>读入深度背景图
+	m_pColorBackground->readDepthBackgroundImage(m_cDepthBackgroundImageName);
+
+	for (int n = m_iStartFrame; n < m_iStartFrame + m_iUpdateStep; n++) {
+
+		if (!m_pColorBackground->getDepthVideoBuffer()->ReadOneFrame(fin_depth, n)) {
+			std::cout << "Set Frame Head Failure!" << std::endl;
+			return false;
+		}
+		if (!m_pColorBackground->getColorVideoBuffer()->ReadOneFrame(fin_color, n)) {
+			std::cout << "Set Frame Head Failure!" << std::endl;
+			return false;
+		}
+
+		//>转换当前帧的图像格式
+		m_pColorBackground->getDepthVideoBuffer()->getData_inBGR(m_pColorBackground->getDepthViewBGRBuffer());
+		m_pColorBackground->getColorVideoBuffer()->getData_inBGR(m_pColorBackground->getColorViewBGRBuffer());
+
+		//>【Test】输出中间结果
+		//m_pColorBackground->showCurrentImage();
+
+		//>进行一帧的操作
+		m_pColorBackground->buildOneFrameColorBackground();
+
+		std::cout << '.';
+	}
+	
+	std::cout << std::endl;
+
+	//>求取平均计算彩色背景图
+	m_pColorBackground->calcFinalColorBackground();
+
+	//>显示彩色背景图结果
+	m_pColorBackground->showColorBackgroundImage();
+
+	//>【Test】测试每一行的countNumber不为0的个数
+	//m_pColorBackground->testShowCountLineSum();
+
+	return true;
 }

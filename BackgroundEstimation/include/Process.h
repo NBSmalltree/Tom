@@ -3,6 +3,7 @@
 
 #include "ParameterViewSyn.h"
 #include "DepthBackground.h"
+#include "ColorBackground.h"
 #include "yuv.h"
 #include "PixelHist.h"
 
@@ -15,14 +16,16 @@ public:
 
 	void Init(ParameterViewSyn cParameter);
 	bool initDepthBackground();
-
-	//CIYuv* getDepthImageBuffer() { return m_pcDepthImage; }
-	//CIYuv* getColorImageBuffer() { return m_pcColorImage; }
+	bool initColorBackground();
 
 	bool buildDepthMap();
 	void calcOnePixelHist(int x, int y);
 	void calcHist();
 
+	bool calcColorBackground();
+
+	
+	
 private:
 	int m_iWidth;
 	int m_iHeight;
@@ -35,13 +38,11 @@ private:
 	std::string m_cDepthBackgroundImageName;
 	std::string m_cColorBackgroundImageName;
 
-	//CIYuv *m_pcDepthImage;
-	//CIYuv *m_pcColorImage;
-
 	FILE *fin_depth;
 	FILE *fin_color;
 
 	CDepthBackground *m_pDepthBackground;
+	CColorBackground *m_pColorBackground;
 
 	cv::Mat *m_pDepthBackgroundImage;
 	

@@ -36,6 +36,9 @@
     <ClCompile Include="src\DepthBackground.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="src\ColorBackground.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\yuv.h">
@@ -57,6 +60,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="include\DepthBackground.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ColorBackground.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
