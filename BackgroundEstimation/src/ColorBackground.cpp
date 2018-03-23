@@ -67,10 +67,6 @@ void CColorBackground::buildOneFrameColorBackground()
 	int rangeMax;
 	int tempY;
 	
-	//【Test】
-	int testHeight = m_pcDepthBackgroundImage->rows;
-	int testWidth = m_pcDepthBackgroundImage->cols;
-
 	//>开始遍历全图像
 	for (int h = 0; h < m_iHeight; h++) {
 		//>定义深度图Mat类行指针
@@ -80,10 +76,14 @@ void CColorBackground::buildOneFrameColorBackground()
 		ushort* p_TemporalColorLine = m_pcTemporalColorImage->ptr<ushort>(h);
 		for (int w = 0; w < m_iWidth; w++) {
 
+			//>排除深度背景图中的空洞
+			if(p_DepthViewImageLine[3 * w + 2] == 0 && p_DepthViewImageLine[3 * w + 1] == 0 && p_DepthViewImageLine[3 * w] == 0)
+				continue;
+
 			rangeMin = CLIP3(p_DepthBackgroundImageLine[w] - m_iRange, 0, 255);
 			rangeMax = CLIP3(p_DepthBackgroundImageLine[w] + m_iRange, 0, 255);
 
-			tempY = /*(uchar)*/(0.299*p_DepthViewImageLine[3 * w + 2] + 0.587*p_DepthViewImageLine[3 * w + 1] + 0.114*p_DepthViewImageLine[3 * w] + 0.5);
+			tempY = (int)(0.299*p_DepthViewImageLine[3 * w + 2] + 0.587*p_DepthViewImageLine[3 * w + 1] + 0.114*p_DepthViewImageLine[3 * w] + 0.5);
 
 			if (tempY >= rangeMin && tempY <= rangeMax) {
 				p_TemporalColorLine[3 * w] += p_ColorViewImageLine[3 * w];
@@ -135,6 +135,16 @@ void CColorBackground::showColorBackgroundImage()
 {
 	cv::imshow(">彩色背景图", *m_pcColorBackgroundImage);
 	cv::waitKey(0);
+}
+
+void CColorBackground::writeColorBackgroundImage(const std::string& strName)
+{
+	//写入配置;
+	std::vector<int>compression_params;
+	compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
+	compression_params.push_back(9);
+
+	cv::imwrite(strName, *m_pcColorBackgroundImage);
 }
 
 void CColorBackground::testShowCountLineSum()

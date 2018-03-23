@@ -70,7 +70,7 @@ bool CBackgroundEstimation::initColorBackground()
 	m_pColorBackground->setStartFrame(m_iStartFrame);
 	m_pColorBackground->setTotalFrame(m_iTotalFrame);
 	m_pColorBackground->setUpdateStep(m_iUpdateStep);
-	m_pColorBackground->setRange(50);
+	m_pColorBackground->setRange(20);
 	
 
 	if (!m_pColorBackground->allocateMem())
@@ -232,9 +232,12 @@ bool CBackgroundEstimation::calcColorBackground()
 	//>求取平均计算彩色背景图
 	m_pColorBackground->calcFinalColorBackground();
 
+	//>保存彩色背景图结果
+	m_pColorBackground->writeColorBackgroundImage(m_cColorBackgroundImageName);
+
 	//>显示彩色背景图结果
 	m_pColorBackground->showColorBackgroundImage();
-
+	
 	//>【Test】测试每一行的countNumber不为0的个数
 	//m_pColorBackground->testShowCountLineSum();
 

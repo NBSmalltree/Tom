@@ -36,7 +36,7 @@ int main(int argc, char ** argv)
 	std::cout << std::setprecision(4) << "Initialization : " << (double)(finish - start) / CLOCKS_PER_SEC << 's' << std::endl;
 	start = clock();
 #endif // OUTPUT_COMPUTATIONAL_TIME
-	/*
+	
 	//>进入构建深度背景图环节
 	if (!cBackgroundEstimation.initDepthBackground()) {
 		std::cout << "Initialize CDepthBackground Class Failure!" << std::endl;
@@ -54,7 +54,7 @@ int main(int argc, char ** argv)
 
 	//>计算全画幅直方图，生成背景深度图
 	cBackgroundEstimation.calcHist();
-	*/
+	
 	//>进入构建彩色背景图环节
 	if (!cBackgroundEstimation.initColorBackground()) {
 		std::cout << "Initialize CColorBackground Class Failure!" << std::endl;

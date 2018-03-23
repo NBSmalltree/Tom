@@ -29,6 +29,7 @@ public:
 	void readDepthBackgroundImage(const std::string&);
 	void showCurrentImage();
 	void showColorBackgroundImage();
+	void writeColorBackgroundImage(const std::string&);
 
 	void testShowCountLineSum();
 
