@@ -18,6 +18,12 @@ CBackgroundEstimation::~CBackgroundEstimation()
 		fclose(fin_depth);
 	if (fin_color)
 		fclose(fin_color);
+	if (fout_depthBackground)
+		fclose(fout_depthBackground);
+	if (fin_depthBackground)
+		fclose(fin_depthBackground);
+	if (fout_colorBackground)
+		fclose(fout_colorBackground);
 
 	if (m_pDepthBackground != NULL) delete m_pDepthBackground;
 	if (m_pColorBackground != NULL) delete m_pColorBackground;
@@ -55,7 +61,8 @@ bool CBackgroundEstimation::initDepthBackground()
 	if (!m_pDepthBackground->allocateMem())
 		return false;
 
-	if (fopen_s(&fin_depth, m_cDepthVideoName.c_str(), "rb"))
+	if (fopen_s(&fin_depth, m_cDepthVideoName.c_str(), "rb")||
+		fopen_s(&fout_depthBackground, m_cDepthBackgroundImageName.c_str(), "wb"))
 		return false;
 
 	return true;
@@ -70,17 +77,53 @@ bool CBackgroundEstimation::initColorBackground()
 	m_pColorBackground->setStartFrame(m_iStartFrame);
 	m_pColorBackground->setTotalFrame(m_iTotalFrame);
 	m_pColorBackground->setUpdateStep(m_iUpdateStep);
-	m_pColorBackground->setRange(20);
+	m_pColorBackground->setRange(5);
 	
 
 	if (!m_pColorBackground->allocateMem())
 		return false;
 
 	if (fopen_s(&fin_depth, m_cDepthVideoName.c_str(), "rb")||
-		fopen_s(&fin_color, m_cColorVideoName.c_str(), "rb"))
+		fopen_s(&fin_depthBackground, m_cDepthBackgroundImageName.c_str(), "rb")||
+		fopen_s(&fin_color, m_cColorVideoName.c_str(), "rb")||
+		fopen_s(&fout_colorBackground, m_cColorBackgroundImageName.c_str(), "wb"))
 		return false;
 
 	return true;
+}
+
+void CBackgroundEstimation::releaseDepthBackground()
+{
+	m_pDepthBackground->releaseMem();
+
+	if (fin_depth)
+		fclose(fin_depth);
+	if (fout_depthBackground)
+		fclose(fout_depthBackground);
+
+	if (m_pDepthBackground != nullptr) {
+		delete m_pDepthBackground;
+		m_pDepthBackground = nullptr;
+	}
+}
+
+void CBackgroundEstimation::releaseColorBackground()
+{
+	m_pColorBackground->releaseMem();
+
+	if (fin_depth)
+		fclose(fin_depth);
+	if (fin_depthBackground)
+		fclose(fin_depthBackground);
+	if (fin_color)
+		fclose(fin_color);
+	if (fout_colorBackground)
+		fclose(fout_colorBackground);
+
+	if (m_pColorBackground != nullptr) {
+		delete m_pColorBackground;
+		m_pColorBackground = nullptr;
+	}
 }
 
 bool CBackgroundEstimation::buildDepthMap()
@@ -149,12 +192,10 @@ void CBackgroundEstimation::calcOnePixelHist(int x, int y)
 void CBackgroundEstimation::calcHist()
 {
 	//>声明深度背景图空间
-	m_pDepthBackgroundImage = new cv::Mat(m_iHeight, m_iWidth, CV_8UC1);
+	CIYuv yuvBuffer(m_iHeight, m_iWidth, 420);
 	
 	//>开始遍历全图像
 	for (int h = 0; h < m_iHeight; h++) {
-		//>定义深度图Mat类行指针
-		uchar* p_bgLine = m_pDepthBackgroundImage->ptr<uchar>(h);
 		for (int w = 0; w < m_iWidth; w++) {
 
 			//>提取特定像素点的深度，以更新步长为长度，最后一个参数为起始更新帧(转换深度表格式)
@@ -168,7 +209,7 @@ void CBackgroundEstimation::calcHist()
 
 			//>判断是否只有一个峰，如果有且只有一个峰，则此像素点的背景深度值即为该峰对应的深度值
 			if (cPixelHist.isOnlyOneBar()) {
-				p_bgLine[w] = cPixelHist.getDepthValueTag();
+				yuvBuffer.Y[h][w] = cPixelHist.getDepthValueTag();
 				continue;
 			}
 
@@ -177,23 +218,20 @@ void CBackgroundEstimation::calcHist()
 
 			//如果最高峰频次（高度）小于N/5，则此像素点的背景深度值赋值为0【参数3、4间调整】
 			if (cPixelHist.getMaxBarValue() < m_iUpdateStep / 3) {
-				p_bgLine[w] = 0;
+				yuvBuffer.Y[h][w] = 0;
 				continue;
 			}
 
 			//>从直方图最左边开始向右边遍历，记录第一个峰值大于或等于最高峰频次1/8的峰，作为深度值最低的主峰
-			p_bgLine[w] = cPixelHist.getBackgroundMainPeek();
+			yuvBuffer.Y[h][w] = cPixelHist.getBackgroundMainPeek();
 		}
 	}//>全图像遍历完成
 
-	//>测试提取的深度背景图
-	//写入配置;
-	std::vector<int>compression_params;
-	compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
-	compression_params.push_back(9);
-	cv::imwrite(m_cDepthBackgroundImageName, *m_pDepthBackgroundImage);
-	//cv::imshow("背景深度图;", *m_pDepthBackgroundImage);
-	//cv::waitKey(0);
+	//>写入生成的深度背景图
+	yuvBuffer.WriteOneFrame(fout_depthBackground);
+
+	//>Release CDepthBackground Class
+	releaseDepthBackground();
 }
 
 bool CBackgroundEstimation::calcColorBackground()
@@ -201,7 +239,7 @@ bool CBackgroundEstimation::calcColorBackground()
 	std::cout << "Start to Calculate Color Background :" << std::endl;
 
 	//>读入深度背景图
-	m_pColorBackground->readDepthBackgroundImage(m_cDepthBackgroundImageName);
+	m_pColorBackground->readDepthBackgroundImage(fin_depthBackground);
 
 	for (int n = m_iStartFrame; n < m_iStartFrame + m_iUpdateStep; n++) {
 
@@ -214,13 +252,6 @@ bool CBackgroundEstimation::calcColorBackground()
 			return false;
 		}
 
-		//>转换当前帧的图像格式
-		m_pColorBackground->getDepthVideoBuffer()->getData_inBGR(m_pColorBackground->getDepthViewBGRBuffer());
-		m_pColorBackground->getColorVideoBuffer()->getData_inBGR(m_pColorBackground->getColorViewBGRBuffer());
-
-		//>【Test】输出中间结果
-		//m_pColorBackground->showCurrentImage();
-
 		//>进行一帧的操作
 		m_pColorBackground->buildOneFrameColorBackground();
 
@@ -232,14 +263,11 @@ bool CBackgroundEstimation::calcColorBackground()
 	//>求取平均计算彩色背景图
 	m_pColorBackground->calcFinalColorBackground();
 
-	//>保存彩色背景图结果
-	m_pColorBackground->writeColorBackgroundImage(m_cColorBackgroundImageName);
+	//>写入生成的彩色背景图
+	m_pColorBackground->writeColorBackgroundImage(fout_colorBackground);
 
-	//>显示彩色背景图结果
-	m_pColorBackground->showColorBackgroundImage();
-	
-	//>【Test】测试每一行的countNumber不为0的个数
-	//m_pColorBackground->testShowCountLineSum();
+	//>Release CColorBackground Class
+	releaseColorBackground();
 
 	return true;
 }

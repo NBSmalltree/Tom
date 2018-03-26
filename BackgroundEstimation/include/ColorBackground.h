@@ -18,20 +18,15 @@ public:
 	
 	CIYuv* getDepthVideoBuffer() { return m_pcDepthVideo; }
 	CIYuv* getColorVideoBuffer() { return m_pcColorVideo; }
-	cv::Mat* getDepthViewBGRBuffer() { return m_pcDepthViewImage; }
-	cv::Mat* getColorViewBGRBuffer() { return m_pcColorViewImage; }
 
 	bool allocateMem();
+	void releaseMem();
 
 	void buildOneFrameColorBackground();
 	void calcFinalColorBackground();
 
-	void readDepthBackgroundImage(const std::string&);
-	void showCurrentImage();
-	void showColorBackgroundImage();
-	void writeColorBackgroundImage(const std::string&);
-
-	void testShowCountLineSum();
+	void readDepthBackgroundImage(FILE*);
+	void writeColorBackgroundImage(FILE*);
 
 private:
 	int m_iWidth;
@@ -44,13 +39,14 @@ private:
 	CIYuv *m_pcDepthVideo;
 	CIYuv *m_pcColorVideo;
 
-	cv::Mat *m_pcDepthBackgroundImage;
-	cv::Mat *m_pcColorBackgroundImage;
-	cv::Mat *m_pcDepthViewImage;
-	cv::Mat *m_pcColorViewImage;
-	cv::Mat *m_pcTemporalColorImage;
-
 	int *countNumber;
-	int testsum1, testsum2;
+	int *countNumberUV;
+
+	CIYuv *m_depthBackgroundYUV;
+	CIYuv *m_colorBackgroundYUV;
+	int **m_temporalColorSpaceY;
+	int **m_temporalColorSpaceU;
+	int **m_temporalColorSpaceV;
+
 };
 

@@ -10,7 +10,8 @@ using namespace std;
 #define BACKGROUND_AVERAGE 0
 #define BACKGROUND_GMM 0
 #define HOLEFILL 0
-#define PSNR_AND_MSSIM 1
+#define PSNR_AND_MSSIM 0
+#define YUV_READ_AND_WRITE 1
 
 int main(int argc, char ** argv)
 {
@@ -190,6 +191,43 @@ int main(int argc, char ** argv)
 	system("pause");
 
 #endif // PSNR_AND_MSSIM
+
+#if YUV_READ_AND_WRITE
+	
+	std::string depthVideoName = "bookarrival_9.yuv";
+	std::string outVideoName = "testout.yuv";
+	FILE *fin_depth, *fout_depth;
+	if (fopen_s(&fin_depth, depthVideoName.c_str(), "rb")||
+		fopen_s(&fout_depth,outVideoName.c_str(),"wb"))
+		return false;
+	
+	CIYuv depthVideo(768, 1024, 420);
+	CIYuv outVideo(768, 1024, 420);
+
+	int height = depthVideo.getHeight();
+	int width = depthVideo.getWidth();
+	int heightUV = depthVideo.getHeightUV();
+	int widthUV = depthVideo.getWidthUV();
+
+	depthVideo.ReadOneFrame(fin_depth, 0);
+
+	//>Y
+	for (int h = 0; h < height; h++)
+		for (int w = 0; w < width; w++)
+			outVideo.Y[h][w] = depthVideo.Y[h][w];
+	//>U¡¢V
+	for (int h = 0; h < heightUV; h++)
+		for (int w = 0; w < widthUV; w++) {
+			outVideo.U[h][w] = depthVideo.U[h][w];
+			outVideo.V[h][w] = depthVideo.V[h][w];
+		}
+
+	outVideo.WriteOneFrame(fout_depth);
+
+	fclose(fin_depth);
+	fclose(fout_depth);
+
+#endif // YUV_READ_AND_WRITE
 
 	return 0;
 }

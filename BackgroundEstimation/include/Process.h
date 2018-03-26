@@ -17,6 +17,8 @@ public:
 	void Init(ParameterViewSyn cParameter);
 	bool initDepthBackground();
 	bool initColorBackground();
+	void releaseDepthBackground();
+	void releaseColorBackground();
 
 	bool buildDepthMap();
 	void calcOnePixelHist(int x, int y);
@@ -24,8 +26,6 @@ public:
 
 	bool calcColorBackground();
 
-	
-	
 private:
 	int m_iWidth;
 	int m_iHeight;
@@ -40,6 +40,9 @@ private:
 
 	FILE *fin_depth;
 	FILE *fin_color;
+	FILE *fout_depthBackground;
+	FILE *fin_depthBackground;
+	FILE *fout_colorBackground;
 
 	CDepthBackground *m_pDepthBackground;
 	CColorBackground *m_pColorBackground;

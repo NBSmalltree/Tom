@@ -3,13 +3,16 @@
 
 CColorBackground::CColorBackground()
 {
-	m_pcDepthVideo = NULL;
-	m_pcColorVideo = NULL;
-	m_pcDepthBackgroundImage = NULL;
-	m_pcColorBackgroundImage = NULL;
-	m_pcDepthViewImage = NULL;
-	m_pcColorViewImage = NULL;
-	m_pcTemporalColorImage = NULL;
+	m_pcDepthVideo = nullptr;
+	m_pcColorVideo = nullptr;
+	
+	m_depthBackgroundYUV = nullptr;
+	m_colorBackgroundYUV = nullptr;
+	m_temporalColorSpaceY = nullptr;
+	m_temporalColorSpaceU = nullptr;
+	m_temporalColorSpaceV = nullptr;
+	countNumber = nullptr;
+	countNumberUV = nullptr;
 }
 
 CColorBackground::~CColorBackground()
@@ -17,29 +20,35 @@ CColorBackground::~CColorBackground()
 	if (m_pcDepthVideo != nullptr) delete m_pcDepthVideo;
 	if (m_pcColorVideo != nullptr) delete m_pcColorVideo;
 
-	if (m_pcDepthBackgroundImage != nullptr) {
-		m_pcDepthBackgroundImage->release();
-		delete m_pcDepthBackgroundImage;
-	}
-	if (m_pcColorBackgroundImage != nullptr) {
-		m_pcColorBackgroundImage->release();
-		delete m_pcColorBackgroundImage;
-	}
-	if (m_pcDepthViewImage != nullptr) {
-		m_pcDepthViewImage->release();
-		delete m_pcDepthViewImage;
-	}
-	if (m_pcColorViewImage != nullptr) {
-		m_pcColorViewImage->release();
-		delete m_pcColorViewImage;
-	}
-	if (m_pcTemporalColorImage != nullptr) {
-		m_pcTemporalColorImage->release();
-		delete m_pcTemporalColorImage;
-	}
 	if (countNumber!=nullptr) {
 		delete countNumber;
-		countNumber = NULL;
+		countNumber = nullptr;
+	}
+	if (countNumberUV != nullptr) {
+		delete countNumberUV;
+		countNumberUV = nullptr;
+	}
+
+	if (m_depthBackgroundYUV != nullptr) {
+		delete m_depthBackgroundYUV;
+		m_depthBackgroundYUV = nullptr;
+	}
+	if (m_colorBackgroundYUV != nullptr) {
+		delete m_colorBackgroundYUV;
+		m_colorBackgroundYUV = nullptr;
+	}
+
+	if (m_temporalColorSpaceY != nullptr) {
+		delete[] m_temporalColorSpaceY[0];
+		m_temporalColorSpaceY = nullptr;
+	}
+	if (m_temporalColorSpaceU != nullptr) {
+		delete[] m_temporalColorSpaceU[0];
+		m_temporalColorSpaceU = nullptr;
+	}
+	if (m_temporalColorSpaceV != nullptr) {
+		delete[] m_temporalColorSpaceV[0];
+		m_temporalColorSpaceV = nullptr;
 	}
 }
 
@@ -48,49 +57,111 @@ bool CColorBackground::allocateMem()
 	m_pcDepthVideo = new CIYuv(m_iHeight, m_iWidth, 420);
 	m_pcColorVideo = new CIYuv(m_iHeight, m_iWidth, 420);
 
-	m_pcDepthBackgroundImage = new cv::Mat(m_iHeight, m_iWidth, CV_8UC1, cv::Scalar(0));
-	m_pcColorBackgroundImage = new cv::Mat(m_iHeight, m_iWidth, CV_8UC3, cv::Scalar(0, 0, 0));
-	m_pcDepthViewImage = new cv::Mat(m_iHeight, m_iWidth, CV_8UC3, cv::Scalar(0, 0, 0));
-	m_pcColorViewImage = new cv::Mat(m_iHeight, m_iWidth, CV_8UC3, cv::Scalar(0, 0, 0));
-	m_pcTemporalColorImage = new cv::Mat(m_iHeight, m_iWidth, CV_16UC3, cv::Scalar(0, 0, 0));
-
 	countNumber = new int[m_iHeight * m_iWidth]{0};
-	testsum1 = 0;
-	testsum2 = 0;
+	countNumberUV = new int[m_iHeight * m_iWidth / 4]{ 0 };
+
+	//>Change BGR Format to YUV Format
+	m_depthBackgroundYUV = new CIYuv(m_iHeight, m_iWidth, 420);
+	m_colorBackgroundYUV = new CIYuv(m_iHeight, m_iWidth, 420);
+
+	m_temporalColorSpaceY = new int *[m_iHeight];
+	m_temporalColorSpaceY[0] = new int[m_iHeight * m_iWidth];
+	for (int h = 1; h < m_iHeight; h++) {
+		m_temporalColorSpaceY[h] = m_temporalColorSpaceY[h - 1] + m_iWidth;
+	}
+	for (int h = 0; h < m_iHeight; h++)
+		for(int w = 0; w < m_iWidth; w++)
+			m_temporalColorSpaceY[h][w] = 0;
+
+	m_temporalColorSpaceU = new int *[m_iHeight / 2];
+	m_temporalColorSpaceU[0] = new int[m_iHeight * m_iWidth / 4];
+	for (int h = 1; h < m_iHeight / 2; h++) {
+		m_temporalColorSpaceU[h] = m_temporalColorSpaceU[h - 1] + m_iWidth / 2;
+	}
+	for (int h = 0; h < m_iHeight / 2; h++)
+		for (int w = 0; w < m_iWidth / 2; w++)
+			m_temporalColorSpaceU[h][w] = 0;
+
+	m_temporalColorSpaceV = new int *[m_iHeight / 2];
+	m_temporalColorSpaceV[0] = new int[m_iHeight * m_iWidth / 4];
+	for (int h = 1; h < m_iHeight / 2; h++) {
+		m_temporalColorSpaceV[h] = m_temporalColorSpaceV[h - 1] + m_iWidth / 2;
+	}
+	for (int h = 0; h < m_iHeight / 2; h++)
+		for (int w = 0; w < m_iWidth / 2; w++)
+			m_temporalColorSpaceV[h][w] = 0;
 
 	return true;
+}
+
+void CColorBackground::releaseMem()
+{
+	if (m_pcDepthVideo!=nullptr){
+		delete m_pcDepthVideo;
+		m_pcDepthVideo = nullptr;
+	}
+	if (m_pcColorVideo != nullptr) {
+		delete m_pcColorVideo;
+		m_pcColorVideo = nullptr;
+	}
+
+	if (countNumber != nullptr) {
+		delete countNumber;
+		countNumber = nullptr;
+	}
+	if (countNumberUV != nullptr) {
+		delete countNumberUV;
+		countNumberUV = nullptr;
+	}
+
+	if (m_depthBackgroundYUV != nullptr) {
+		delete m_depthBackgroundYUV;
+		m_depthBackgroundYUV = nullptr;
+	}
+	if (m_colorBackgroundYUV != nullptr) {
+		delete m_colorBackgroundYUV;
+		m_colorBackgroundYUV = nullptr;
+	}
+
+	if (m_temporalColorSpaceY != nullptr) {
+		delete[] m_temporalColorSpaceY[0];
+		m_temporalColorSpaceY = nullptr;
+	}
+	if (m_temporalColorSpaceU != nullptr) {
+		delete[] m_temporalColorSpaceU[0];
+		m_temporalColorSpaceU = nullptr;
+	}
+	if (m_temporalColorSpaceV != nullptr) {
+		delete[] m_temporalColorSpaceV[0];
+		m_temporalColorSpaceV = nullptr;
+	}
 }
 
 void CColorBackground::buildOneFrameColorBackground()
 {
 	int rangeMin;
 	int rangeMax;
-	int tempY;
 	
 	//>开始遍历全图像
 	for (int h = 0; h < m_iHeight; h++) {
-		//>定义深度图Mat类行指针
-		uchar* p_DepthBackgroundImageLine = m_pcDepthBackgroundImage->ptr<uchar>(h);
-		uchar* p_DepthViewImageLine = m_pcDepthViewImage->ptr<uchar>(h);
-		uchar* p_ColorViewImageLine = m_pcColorViewImage->ptr<uchar>(h);
-		ushort* p_TemporalColorLine = m_pcTemporalColorImage->ptr<ushort>(h);
 		for (int w = 0; w < m_iWidth; w++) {
-
 			//>排除深度背景图中的空洞
-			if(p_DepthViewImageLine[3 * w + 2] == 0 && p_DepthViewImageLine[3 * w + 1] == 0 && p_DepthViewImageLine[3 * w] == 0)
+			if(m_depthBackgroundYUV->Y[h][w] == 0)
 				continue;
 
-			rangeMin = CLIP3(p_DepthBackgroundImageLine[w] - m_iRange, 0, 255);
-			rangeMax = CLIP3(p_DepthBackgroundImageLine[w] + m_iRange, 0, 255);
+			rangeMin = CLIP3(m_depthBackgroundYUV->Y[h][w] - m_iRange, 0, 255);
+			rangeMax = CLIP3(m_depthBackgroundYUV->Y[h][w] + m_iRange, 0, 255);
 
-			tempY = (int)(0.299*p_DepthViewImageLine[3 * w + 2] + 0.587*p_DepthViewImageLine[3 * w + 1] + 0.114*p_DepthViewImageLine[3 * w] + 0.5);
+			if (m_pcDepthVideo->Y[h][w] >= rangeMin && m_pcDepthVideo->Y[h][w] <= rangeMax) {
+				//>Y
+				m_temporalColorSpaceY[h][w] += m_pcColorVideo->Y[h][w];
+				//>U、V
+				m_temporalColorSpaceU[h / 2][w / 2] += m_pcColorVideo->U[h / 2][w / 2];
+				m_temporalColorSpaceV[h / 2][w / 2] += m_pcColorVideo->V[h / 2][w / 2];
 
-			if (tempY >= rangeMin && tempY <= rangeMax) {
-				p_TemporalColorLine[3 * w] += p_ColorViewImageLine[3 * w];
-				p_TemporalColorLine[3 * w + 1] += p_ColorViewImageLine[3 * w + 1];
-				p_TemporalColorLine[3 * w + 2] += p_ColorViewImageLine[3 * w + 2];
-
+				//>CountNumber
 				countNumber[h*m_iWidth + w]++;
+				countNumberUV[h / 2 * m_iWidth / 2 + w / 2]++;
 			}
 			
 		}
@@ -99,62 +170,35 @@ void CColorBackground::buildOneFrameColorBackground()
 
 void CColorBackground::calcFinalColorBackground()
 {
-
-	//>开始遍历全图像
+	//>Y
 	for (int h = 0; h < m_iHeight; h++) {
-		//>定义深度图Mat类行指针
-		uchar* p_ColorBackgroundImageLine = m_pcColorBackgroundImage->ptr<uchar>(h);
-		ushort* p_TemporalColorLine = m_pcTemporalColorImage->ptr<ushort>(h);
 		for (int w = 0; w < m_iWidth; w++) {
-
 			if (countNumber[h*m_iWidth + w] != 0) {
-				p_ColorBackgroundImageLine[3 * w] = (uchar)(p_TemporalColorLine[3 * w] / (double)countNumber[h*m_iWidth + w]);
-				p_ColorBackgroundImageLine[3 * w + 1] = (uchar)(p_TemporalColorLine[3 * w + 1] / (double)countNumber[h*m_iWidth + w]);
-				p_ColorBackgroundImageLine[3 * w + 2] = (uchar)(p_TemporalColorLine[3 * w + 2] / (double)countNumber[h*m_iWidth + w]);
+				m_colorBackgroundYUV->Y[h][w] = (BYTE)(m_temporalColorSpaceY[h][w] / 1.0 / countNumber[h*m_iWidth + w]);
 			}
 
 		}
-	}//>全图像遍历完成
-}
-
-void CColorBackground::readDepthBackgroundImage(const std::string& strName)
-{
-	cv::Mat &tMat = cv::imread(strName);
-	tMat.copyTo(*m_pcDepthBackgroundImage);
-}
-
-void CColorBackground::showCurrentImage()
-{
-	cv::imshow(">当前深度背景图", *m_pcDepthBackgroundImage);
-	cv::imshow(">当前深度图", *m_pcDepthViewImage);
-	cv::imshow(">当前彩色图", *m_pcColorViewImage);
-	cv::waitKey(0);
-}
-
-void CColorBackground::showColorBackgroundImage()
-{
-	cv::imshow(">彩色背景图", *m_pcColorBackgroundImage);
-	cv::waitKey(0);
-}
-
-void CColorBackground::writeColorBackgroundImage(const std::string& strName)
-{
-	//写入配置;
-	std::vector<int>compression_params;
-	compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
-	compression_params.push_back(9);
-
-	cv::imwrite(strName, *m_pcColorBackgroundImage);
-}
-
-void CColorBackground::testShowCountLineSum()
-{
-	for (int h = 0; h < m_iHeight; h++) {
-		int sum = 0;
-		for (int w = 0; w < m_iWidth; w++) {
-			if (countNumber[h*m_iWidth + w] != 0)
-				sum++;
-		}
-		std::cout << sum << std::endl;
 	}
+
+	//>U、V
+	for (int h = 0; h < m_iHeight / 2; h++) {
+		for (int w = 0; w < m_iWidth / 2; w++) {
+			if (countNumberUV[h*m_iWidth/2 + w] != 0) {
+				m_colorBackgroundYUV->U[h][w] = (BYTE)(1.0 * m_temporalColorSpaceU[h][w] / countNumberUV[h * m_iWidth / 2 + w]);
+				m_colorBackgroundYUV->V[h][w] = (BYTE)(1.0 * m_temporalColorSpaceV[h][w] / countNumberUV[h * m_iWidth / 2 + w]);
+			}
+		}
+	}
+
+}
+
+void CColorBackground::readDepthBackgroundImage(FILE *fin)
+{
+	//>Read DepthBackground From .yuv File
+	m_depthBackgroundYUV->ReadOneFrame(fin, 0);
+}
+
+void CColorBackground::writeColorBackgroundImage(FILE *fin)
+{
+	m_colorBackgroundYUV->WriteOneFrame(fin);
 }

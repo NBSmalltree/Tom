@@ -6,10 +6,6 @@
 #include "Process.h"
 
 
-#define SAVE_CERTAIN_PIXEL_HIST_IMAGE 0
-#define GET_DEPTH_BACKGROUND_USING_HISTOGRAM_SEGMENTATION 0
-#define GET_COLOR_BACKGROUND 0
-
 int main(int argc, char ** argv)
 {
 	std::cout.setf(std::ios::fixed);
@@ -19,22 +15,24 @@ int main(int argc, char ** argv)
 
 #ifdef OUTPUT_COMPUTATIONAL_TIME
 	clock_t start, finish, first;
-	first = start = clock();
+	start = clock();
 #endif // OUTPUT_COMPUTATIONAL_TIME
 
 	ParameterViewSyn cParameter;
 	CBackgroundEstimation cBackgroundEstimation;
 
-	if (cParameter.Init(argc, argv) != 1) return 0;
-	std::cout << std::endl;
+	if (cParameter.Init(argc, argv) != 1) {
+		std::cout << "Initialize File Parameters Failure!" << std::endl;
+		return 2;
+	}
 
 	//>初始化Process基本参数
 	cBackgroundEstimation.Init(cParameter);
 
 #ifdef OUTPUT_COMPUTATIONAL_TIME
 	finish = clock();
-	std::cout << std::setprecision(4) << "Initialization : " << (double)(finish - start) / CLOCKS_PER_SEC << 's' << std::endl;
-	start = clock();
+	std::cout << std::setprecision(2) << "Initialization : " << (double)(finish - start) / CLOCKS_PER_SEC << 's' << std::endl << std::endl;
+	first = start = clock();
 #endif // OUTPUT_COMPUTATIONAL_TIME
 	
 	//>进入构建深度背景图环节
@@ -54,7 +52,13 @@ int main(int argc, char ** argv)
 
 	//>计算全画幅直方图，生成背景深度图
 	cBackgroundEstimation.calcHist();
-	
+
+#ifdef OUTPUT_COMPUTATIONAL_TIME
+	finish = clock();
+	std::cout << std::setprecision(2) << "Depth Segmentation Time : " << (double)(finish - start) / CLOCKS_PER_SEC << 's' << std::endl << std::endl;
+	start = clock();
+#endif // OUTPUT_COMPUTATIONAL_TIME
+
 	//>进入构建彩色背景图环节
 	if (!cBackgroundEstimation.initColorBackground()) {
 		std::cout << "Initialize CColorBackground Class Failure!" << std::endl;
@@ -62,12 +66,16 @@ int main(int argc, char ** argv)
 	}
 
 	//>计算彩色背景图
-	cBackgroundEstimation.calcColorBackground();
+	if (!cBackgroundEstimation.calcColorBackground()) {
+		std::cout << "Process Color Reconstruction Failure!" << std::endl;
+		return 6;
+	}
 
-#if GET_COLOR_BACKGROUND
+#ifdef OUTPUT_COMPUTATIONAL_TIME
+	finish = clock();
+	std::cout << std::setprecision(2) << "Color Reconstruction Time : " << (double)(finish - start) / CLOCKS_PER_SEC << 's' << std::endl << std::endl;
+	std::cout << std::setprecision(2) << "Total Processing Time : " << (double)(finish - first) / CLOCKS_PER_SEC << 's' << std::endl << std::endl;
+#endif // OUTPUT_COMPUTATIONAL_TIME
 
-
-
-#endif // GET_COLOR_BACKGROUND
 	return 1;
 }

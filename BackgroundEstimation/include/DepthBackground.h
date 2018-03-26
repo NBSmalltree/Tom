@@ -41,6 +41,7 @@ public:
 	void setUpdateStep(int sUpdateStep) { m_iUpdateStep = sUpdateStep; }
 
 	bool allocateMem();
+	void releaseMem();
 
 	CIYuv* getFrameBuffer() { return m_pcVideo; }
 	cv::Mat* getBgrBuffer() { return m_pcBgr; }

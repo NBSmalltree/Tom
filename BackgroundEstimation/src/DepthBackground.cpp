@@ -140,6 +140,26 @@ bool CDepthBackground::allocateMem()
 	return true;
 }
 
+void CDepthBackground::releaseMem()
+{
+	if (m_pcVideo != nullptr) {
+		delete m_pcVideo;
+		m_pcVideo = nullptr;
+	}
+	if (m_pcBgr != nullptr) {
+		delete m_pcBgr;
+		m_pcBgr = nullptr;
+	}
+	if (m_pcDepthMap != nullptr) {
+		delete m_pcDepthMap;
+		m_pcDepthMap = nullptr;
+	}
+	if (m_pcCertainPixelDepthMap != nullptr) {
+		free(m_pcCertainPixelDepthMap);
+		m_pcCertainPixelDepthMap = nullptr;
+	}
+}
+
 void CDepthBackground::showCurrentImage()
 {
 	cv::imshow("µ±Ç°Ö¡Í¼Ïñ;", *m_pcBgr);
