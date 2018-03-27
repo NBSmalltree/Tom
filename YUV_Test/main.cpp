@@ -2,6 +2,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/video/background_segm.hpp>
+#include <opencv2/photo/photo.hpp>
 #include <yuv.h>
 #include "function.h"
 
@@ -11,7 +12,8 @@ using namespace std;
 #define BACKGROUND_GMM 0
 #define HOLEFILL 0
 #define PSNR_AND_MSSIM 0
-#define YUV_READ_AND_WRITE 1
+#define YUV_READ_AND_WRITE 0
+#define Y_CHANNEL_INPAINT 1
 
 int main(int argc, char ** argv)
 {
@@ -228,6 +230,57 @@ int main(int argc, char ** argv)
 	fclose(fout_depth);
 
 #endif // YUV_READ_AND_WRITE
+
+#if Y_CHANNEL_INPAINT
+
+	std::string inVideoName = "DepthBackground.yuv";
+	std::string outVideoName = "TargetBackground.yuv";
+
+	FILE *fin, *fout;
+	if (fopen_s(&fin, inVideoName.c_str(), "rb")||
+		fopen_s(&fout,outVideoName.c_str(),"wb"))
+		return false;
+
+	CIYuv inVideo(768, 1024, 420);
+	CIYuv outVideo(768, 1024, 420);
+	int height = inVideo.getHeight();
+	int width = inVideo.getWidth();
+
+	inVideo.ReadOneFrame(fin, 0);
+
+	cv::Mat backgroundImage(height, width, CV_8UC1, inVideo.Y[0]);
+
+	cv::Mat inpaintMask;
+	inpaintMask = cv::Mat::zeros(backgroundImage.size(), CV_8UC1);
+
+	for (int h = 0; h < height; h++) {
+		uchar* backgroundLine = backgroundImage.ptr<uchar>(h);
+		uchar* inpaintMaskLine = inpaintMask.ptr<uchar>(h);
+		for (int w = 0; w < width; w++) {
+			if (backgroundLine[w] == 0)
+				inpaintMaskLine[w] = 255;
+		}
+	}
+
+	//>Process Inpaint Algorithm
+	cv::Mat inpaintedImage;
+	inpaint(backgroundImage, inpaintMask, inpaintedImage, 3, cv::INPAINT_TELEA); //此处第5个参数可以是 INPAINT_NS 或者 INPAINT_TELEA;
+	//cv::imshow(">修补后的效果图", inpaintedImage);
+	//cv::waitKey(0);
+
+	for (int h = 0; h < height; h++) {
+		uchar* matLine = inpaintedImage.ptr<uchar>(h);
+		for (int w = 0; w < width; w++)	{
+			outVideo.Y[h][w] = matLine[w];
+		}
+	}
+
+	outVideo.WriteOneFrame(fout);
+
+	fclose(fin);
+	fclose(fout);
+
+#endif // Y_CHANNEL_INPAINT
 
 	return 0;
 }

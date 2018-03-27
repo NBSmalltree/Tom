@@ -18,7 +18,7 @@ using namespace cv;
 
 //--------------------------全局函数开关;--------------------------------
 
-# define HISTOGRAM 1
+# define HISTOGRAM 0
 
 # define SIFT_AND_BFMATCHER 0
 # define SURF_AND_BFMATCHER 0
@@ -39,7 +39,7 @@ using namespace cv;
 # define YUV_CLASS 0
 
 # define WATERSHED 0
-# define INPAINT 0
+# define INPAINT 1
 
 //--------------------------全局函数申明部分;----------------------------
 static void on_ContrastAndBright(int, void *);

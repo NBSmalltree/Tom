@@ -8,6 +8,6 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LocalDebuggerWorkingDirectory>.\WorkSpace</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>ViewSynthesis_love_YUV.cfg</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>ViewSynthesis_book_YUV.cfg</LocalDebuggerCommandArguments>
   </PropertyGroup>
 </Project>

@@ -1,6 +1,7 @@
 #ifndef Process_h__
 #define Process_h__
 
+#include <opencv2/photo/photo.hpp>
 #include "ParameterViewSyn.h"
 #include "DepthBackground.h"
 #include "ColorBackground.h"
@@ -23,6 +24,7 @@ public:
 	bool buildDepthMap();
 	void calcOnePixelHist(int x, int y);
 	void calcHist();
+	void inpaint(int height, int width, CIYuv* yuvBuffer);
 
 	bool calcColorBackground();
 

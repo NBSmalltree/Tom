@@ -227,11 +227,42 @@ void CBackgroundEstimation::calcHist()
 		}
 	}//>全图像遍历完成
 
+	//>深度图空洞修复
+	inpaint(m_iHeight, m_iWidth, &yuvBuffer);
+
 	//>写入生成的深度背景图
 	yuvBuffer.WriteOneFrame(fout_depthBackground);
 
 	//>Release CDepthBackground Class
 	releaseDepthBackground();
+}
+
+void CBackgroundEstimation::inpaint(int height, int width, CIYuv *yuvBuffer)
+{
+	cv::Mat backgroundImage(height, width, CV_8UC1, yuvBuffer->Y[0]);
+
+	cv::Mat inpaintMask;
+	inpaintMask = cv::Mat::zeros(backgroundImage.size(), CV_8UC1);
+
+	for (int h = 0; h < height; h++) {
+		uchar* backgroundLine = backgroundImage.ptr<uchar>(h);
+		uchar* inpaintMaskLine = inpaintMask.ptr<uchar>(h);
+		for (int w = 0; w < width; w++) {
+			if (backgroundLine[w] == 0)
+				inpaintMaskLine[w] = 255;
+		}
+	}
+
+	cv::Mat inpaintedImage;
+	cv::inpaint(backgroundImage, inpaintMask, inpaintedImage, 3, cv::INPAINT_TELEA); //>此处第5个参数可以是 INPAINT_NS 或者 INPAINT_TELEA
+
+	for (int h = 0; h < height; h++) {
+		uchar* matLine = inpaintedImage.ptr<uchar>(h);
+		for (int w = 0; w < width; w++) {
+			yuvBuffer->Y[h][w] = matLine[w];
+		}
+	}
+
 }
 
 bool CBackgroundEstimation::calcColorBackground()
