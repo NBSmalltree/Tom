@@ -34,6 +34,9 @@ private:
 	int m_iStartFrame;
 	int m_iTotalFrame;
 	int m_iUpdateStep;
+	int m_iSplitRange;
+
+	int m_flagIsInpaint;
 
 	std::string m_cDepthVideoName;
 	std::string m_cColorVideoName;

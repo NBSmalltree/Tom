@@ -16,6 +16,9 @@ public:
 	int getStartFrame() { return m_uiStartFrame; }
 	int getTotalFrame() { return m_uiNumberOfFrames; }
 	int getUpdateStep() { return m_uiUpdateStep; }
+	int getSplitRange() { return m_uiSplitRange; }
+
+	int getIsInpaint() { return m_flagIsInpaint; }
 
 	std::string getDepthVideoName() { return m_cDepthVideoName; }
 	std::string getColorVideoName() { return m_cColorVideoName; }
@@ -31,12 +34,15 @@ protected:
 	int m_uiStartFrame;
 	int m_uiNumberOfFrames;
 	int m_uiUpdateStep;
+	int m_uiSplitRange;
 
 	std::string m_cDepthVideoName;
 	std::string m_cColorVideoName;
 
 	std::string m_cDepthBackgroundImageName;
 	std::string m_cColorBackgroundImageName;
+
+	int m_flagIsInpaint;
 
 };
 

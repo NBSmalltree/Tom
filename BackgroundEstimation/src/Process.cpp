@@ -41,11 +41,14 @@ void CBackgroundEstimation::Init(ParameterViewSyn cParameter)
 	m_iStartFrame = cParameter.getStartFrame();
 	m_iTotalFrame = cParameter.getTotalFrame();
 	m_iUpdateStep = cParameter.getUpdateStep();
+	m_iSplitRange = cParameter.getSplitRange();
 
 	m_cDepthVideoName = cParameter.getDepthVideoName();
 	m_cColorVideoName = cParameter.getColorVideoName();
 	m_cDepthBackgroundImageName = cParameter.getDepthBackgroundImageName();
 	m_cColorBackgroundImageName = cParameter.getColorBackgroundImageName();
+
+	m_flagIsInpaint = cParameter.getIsInpaint();
 }
 
 bool CBackgroundEstimation::initDepthBackground()
@@ -77,7 +80,7 @@ bool CBackgroundEstimation::initColorBackground()
 	m_pColorBackground->setStartFrame(m_iStartFrame);
 	m_pColorBackground->setTotalFrame(m_iTotalFrame);
 	m_pColorBackground->setUpdateStep(m_iUpdateStep);
-	m_pColorBackground->setRange(5);
+	m_pColorBackground->setRange(m_iSplitRange);
 	
 
 	if (!m_pColorBackground->allocateMem())
@@ -228,7 +231,8 @@ void CBackgroundEstimation::calcHist()
 	}//>全图像遍历完成
 
 	//>深度图空洞修复
-	inpaint(m_iHeight, m_iWidth, &yuvBuffer);
+	if(m_flagIsInpaint)
+		inpaint(m_iHeight, m_iWidth, &yuvBuffer);
 
 	//>写入生成的深度背景图
 	yuvBuffer.WriteOneFrame(fout_depthBackground);
