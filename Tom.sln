@@ -19,6 +19,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BackgroundEstimation", "Bac
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HolefillingWithBG", "HolefillingWithBG\HolefillingWithBG.vcxproj", "{A692161E-C1E6-4256-961C-DBC7AAC0FE74}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BGMerge", "BGMerge\BGMerge.vcxproj", "{C568E55C-6DFC-4488-A3CD-DAE950753BA4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -105,6 +107,16 @@ Global
 		{A692161E-C1E6-4256-961C-DBC7AAC0FE74}.Release|x64.Build.0 = Release|x64
 		{A692161E-C1E6-4256-961C-DBC7AAC0FE74}.Release|x86.ActiveCfg = Release|Win32
 		{A692161E-C1E6-4256-961C-DBC7AAC0FE74}.Release|x86.Build.0 = Release|Win32
+		{C568E55C-6DFC-4488-A3CD-DAE950753BA4}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{C568E55C-6DFC-4488-A3CD-DAE950753BA4}.Debug|x64.ActiveCfg = Debug|x64
+		{C568E55C-6DFC-4488-A3CD-DAE950753BA4}.Debug|x64.Build.0 = Debug|x64
+		{C568E55C-6DFC-4488-A3CD-DAE950753BA4}.Debug|x86.ActiveCfg = Debug|Win32
+		{C568E55C-6DFC-4488-A3CD-DAE950753BA4}.Debug|x86.Build.0 = Debug|Win32
+		{C568E55C-6DFC-4488-A3CD-DAE950753BA4}.Release|Any CPU.ActiveCfg = Release|Win32
+		{C568E55C-6DFC-4488-A3CD-DAE950753BA4}.Release|x64.ActiveCfg = Release|x64
+		{C568E55C-6DFC-4488-A3CD-DAE950753BA4}.Release|x64.Build.0 = Release|x64
+		{C568E55C-6DFC-4488-A3CD-DAE950753BA4}.Release|x86.ActiveCfg = Release|Win32
+		{C568E55C-6DFC-4488-A3CD-DAE950753BA4}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

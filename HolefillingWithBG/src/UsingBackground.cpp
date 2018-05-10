@@ -61,7 +61,9 @@ void CUsingBackground::doOneFrame()
 	for (int h = 0; h < m_iHeight; h++) {
 		for (int w = 0; w < m_iWidth; w++) {
 			//>如果输入的像素点为黑色空洞
-			if (m_pcInVideo->Y[h][w] == 0 && m_pcInVideo->U[h / 2][w / 2] == 128 && m_pcInVideo->V[h / 2][w / 2] == 128) {
+			if (m_pcInVideo->Y[h][w] == 0 && 
+				(m_pcInVideo->U[h / 2][w / 2] >= 125 && m_pcInVideo->U[h / 2][w / 2] <= 131) && 
+				(m_pcInVideo->V[h / 2][w / 2] >= 125 && m_pcInVideo->V[h / 2][w / 2] <= 131)) {
 				m_pcOutVideo->Y[h][w] = m_pcBackground->Y[h][w];
 				m_pcOutVideo->U[h / 2][w / 2] = m_pcBackground->U[h / 2][w / 2];
 				m_pcOutVideo->V[h / 2][w / 2] = m_pcBackground->V[h / 2][w / 2];

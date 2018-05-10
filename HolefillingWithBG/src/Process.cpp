@@ -43,7 +43,7 @@ bool CHoleFilling::initUsingBackground()
 	m_pUsingBackground->setStartFrame(m_iStartFrame);
 	m_pUsingBackground->setTotalFrame(m_iTotalFrame);
 
-	if (m_pUsingBackground->allocateMem())
+	if (!m_pUsingBackground->allocateMem())
 		return false;
 
 	if (fopen_s(&fin_video, m_cSourceVideoName.c_str(), "rb") ||
@@ -82,7 +82,7 @@ bool CHoleFilling::doHoleFilling()
 	for (int n = m_iStartFrame; n < m_iStartFrame+m_iTotalFrame; n++) {
 
 		//>Read One InVideo Frame From File
-		if (!m_pUsingBackground->getInVideoBuffer()->ReadOneFrame(fin_background, 0)) {
+		if (!m_pUsingBackground->getInVideoBuffer()->ReadOneFrame(fin_video, n)) {
 			std::cout << "Set Frame Head Failure!" << std::endl;
 			return false;
 		}
