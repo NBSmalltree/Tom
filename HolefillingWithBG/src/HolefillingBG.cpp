@@ -39,11 +39,12 @@ int main(int argc, char ** argv)
 	first = start = clock();
 #endif // OUTPUT_COMPUTATIONAL_TIME
 
-	//>Start proceiing
+	//>Start processing
 	if (!cHoleFilling.doHoleFilling()){
 		std::cout << "Hole Filling Processing Failure!" << std::endl;
 		return 4;
 	}
+
 
 	return 1;
 }
