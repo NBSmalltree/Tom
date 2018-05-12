@@ -10,7 +10,6 @@
 #include "yuv.h"
 //#include "upsample.h"
 
-#define CLIP3(x, min, max) ((x)<(min)?(min):((x)>(max)?(max):(x)))
 
 CIYuv::CIYuv()
 {

@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\DoubleViewFilling.cpp" />
     <ClCompile Include="src\HolefillingBG.cpp" />
     <ClCompile Include="src\ParameterBase.cpp" />
     <ClCompile Include="src\ParameterViewSyn.cpp" />
@@ -27,6 +28,7 @@
     <ClCompile Include="src\yuv.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\DoubleViewFilling.h" />
     <ClInclude Include="include\ParameterBase.h" />
     <ClInclude Include="include\ParameterViewSyn.h" />
     <ClInclude Include="include\Process.h" />

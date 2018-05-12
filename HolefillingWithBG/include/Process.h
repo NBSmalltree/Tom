@@ -3,6 +3,7 @@
 
 #include "ParameterViewSyn.h"
 #include "UsingBackground.h"
+#include "DoubleViewFilling.h"
 #include "yuv.h"
 
 class CHoleFilling
@@ -14,8 +15,13 @@ public:
 	void Init(ParameterViewSyn cParameter);
 	bool initUsingBackground();
 	void releaseUsingBackground();
+	bool initDoubleViewFilling();
+	void releaseDoubleViewFilling();
 
 	bool doHoleFilling();
+
+	bool singleViewFillingWithBG();
+	bool doubleViewFillingWithBG();
 
 private:
 	int m_iWidth;
@@ -23,15 +29,40 @@ private:
 	int m_iStartFrame;
 	int m_iTotalFrame;
 
+	int m_uiIsSingleViewFilling;
+
+	//>SingleViewFilling Input Parameter
 	std::string m_cSourceVideoName;
 	std::string m_cBackgroundImageName;
-	std::string m_cOutVideoName;
+
+	//>DoubleViewFilling Input Parameter
+	std::string m_cLeftImageName;
+	std::string m_cRightImageName;
+	std::string m_cLeftDepthName;
+	std::string m_cRightDepthName;
+
+	std::string m_cBGImageName;
+	std::string m_cBGDepthName;
+
+	//>Output Parameter
+	std::string m_cOutImageName;
+	std::string m_cOutDepthName;
 
 	FILE *fin_video;
 	FILE *fin_background;
-	FILE *fout_video;
+
+	FILE *fin_leftcolor;
+	FILE *fin_rghtcolor;
+	FILE *fin_leftdepth;
+	FILE *fin_rghtdepth;
+	FILE *fin_bgcolor;
+	FILE *fin_bgdepth;
+
+	FILE *fout_color;
+	FILE *fout_depth;
 
 	CUsingBackground *m_pUsingBackground;
+	CDoubleViewFilling *m_pDoubleViewFilling;
 };
 
 #endif // Process_h__

@@ -16,8 +16,6 @@
 //#include <highgui.h>
 #include <opencv2/highgui/highgui.hpp>  //John_Tian  2013.6.15
 
-#define CLIP3(x, min, max) ((x)<(min)?(min):((x)>(max)?(max):(x)))
-
 class CIYuv
 {
 public:

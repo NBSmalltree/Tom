@@ -3,11 +3,11 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LocalDebuggerWorkingDirectory>.\WorkSpace</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>ViewSynthesis_book_YUV.cfg</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>HoleFilling_PoznanStreet_View4from53.cfg</LocalDebuggerCommandArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LocalDebuggerWorkingDirectory>.\WorkSpace</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>ViewSynthesis_book_YUV.cfg</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>HoleFilling_PoznanStreet_View4from53.cfg</LocalDebuggerCommandArguments>
   </PropertyGroup>
 </Project>

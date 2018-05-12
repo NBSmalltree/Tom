@@ -37,9 +37,23 @@ UInt ParameterViewSyn::setup()
 	m_pCfgLines[uiParLnCount++] = new ConfigLineInt("TotalNumberOfFrames", &m_uiNumberOfFrames, 100);
 	m_pCfgLines[uiParLnCount++] = new ConfigLineInt("StartFrame", &m_uiStartFrame, 0);
 
+	m_pCfgLines[uiParLnCount++] = new ConfigLineInt("IsSingleViewFilling", &m_uiIsSingleViewFilling, 1);
+
+	//>SingleViewFilling Input Parameter
 	m_pCfgLines[uiParLnCount++] = new ConfigLineStr("SourceVideoName", &m_cSourceVideoName, "test.yuv");
 	m_pCfgLines[uiParLnCount++] = new ConfigLineStr("BackgroundImageName", &m_cBackgroundImageName, "ColorBackground.yuv");
-	m_pCfgLines[uiParLnCount++] = new ConfigLineStr("OutVideoName", &m_cOutVideoName, "OutVideo.yuv");
+
+	//>DoubleViewFilling Input Parameter
+	m_pCfgLines[uiParLnCount++] = new ConfigLineStr("LeftImageName", &m_cLeftImageName, "leftcolor.yuv");
+	m_pCfgLines[uiParLnCount++] = new ConfigLineStr("RightImageName", &m_cRightImageName, "rightcolor.yuv");
+	m_pCfgLines[uiParLnCount++] = new ConfigLineStr("LeftDepthName", &m_cLeftDepthName, "leftdepth.yuv");
+	m_pCfgLines[uiParLnCount++] = new ConfigLineStr("RightDepthName", &m_cRightDepthName, "rightdepth.yuv");
+	m_pCfgLines[uiParLnCount++] = new ConfigLineStr("BGImageName", &m_cBGImageName, "leftdepth.yuv");
+	m_pCfgLines[uiParLnCount++] = new ConfigLineStr("BGDepthName", &m_cBGDepthName, "rightdepth.yuv");
+
+	//>Output Parameter
+	m_pCfgLines[uiParLnCount++] = new ConfigLineStr("OutputImageName", &m_cOutImageName, "outImage.yuv");
+	m_pCfgLines[uiParLnCount++] = new ConfigLineStr("OutputDepthName", &m_cOutDepthName, "outDepth.yuv");
 
 	m_pCfgLines[uiParLnCount] = NULL;
 

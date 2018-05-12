@@ -21,17 +21,11 @@ int main(int argc, char ** argv)
 
 	if (cParameter.Init(argc, argv) != 1) {
 		std::cout << "Initialize File Parameters Failure!" << std::endl;
-		return 2;
+		return 1;
 	}
 
 	//>初始化Process基本参数
 	cHoleFilling.Init(cParameter);
-
-	//>初始化CUsingBackground Class参数
-	if (!cHoleFilling.initUsingBackground()) {
-		std::cout << "Initialize CUsingBackground Class Failure!" << std::endl;
-		return 3;
-	}
 
 #ifdef OUTPUT_COMPUTATIONAL_TIME
 	finish = clock();
@@ -42,9 +36,14 @@ int main(int argc, char ** argv)
 	//>Start processing
 	if (!cHoleFilling.doHoleFilling()){
 		std::cout << "Hole Filling Processing Failure!" << std::endl;
-		return 4;
+		return 2;
 	}
 
+#ifdef OUTPUT_COMPUTATIONAL_TIME
+	finish = clock();
+	std::cout << std::setprecision(2) << "Processing Time : " << (double)(finish - start) / CLOCKS_PER_SEC << 's' << std::endl << std::endl;
+	first = start = clock();
+#endif // OUTPUT_COMPUTATIONAL_TIME
 
-	return 1;
+	return 0;
 }
