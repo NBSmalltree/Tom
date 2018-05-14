@@ -36,6 +36,41 @@ Estimate the background through Depth Map, which considers the object distance t
 	
 </details>
 
+## HolefillingWithBG
+
+Fill the backhole in the warped image with BG information, Combines Filling and Merging process.
+
+<details>
+<summary>Function :</summary>
+
+  - One View Filling
+  - Two View Filling
+    - Filling Stratagem A: Filling after Merge
+	- Filling Stratagem B: Merge after Filling(default)
+	
+</details>
+
+<details>
+<summary>IO :</summary>
+
+  - Input : 
+    - For One View Filling Only
+      - A Certain View Color Image
+      - A Certain View Depth Map
+    - For Two View Filling Only
+	  - Left View Color Image
+	  - Left View Depth Map
+	  - Right View Color Image
+	  - Right View Depth Map
+	- Common
+	  - Virtual View Background Color Image
+	  - Virtual View Background Depth Map
+  - Output : 
+    - Virtual View Color Image
+	- Virtual View Depth Map
+	
+</details>
+
 ## NBU
 
 Temporal File of NBU OJ.
