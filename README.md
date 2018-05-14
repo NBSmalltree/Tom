@@ -2,6 +2,24 @@
 
 This is a collection of my daily projects, which are organized in separate files. The propose of each project states as following.
 
+## BGMerge
+
+Merge the Background from the warped left view and the warped right view, considering their depth value.
+
+<details>
+<summary>IO :</summary>
+
+  - Input : 
+    - Left View Warped Background Color Image
+	- Left View Warped Background Depth Map
+	- Right View Warped Background Color Image
+	- Right View Warped Background Depth Map
+  - Output : 
+    - Merged Virtual View Background Color Image
+	- Merged Virtual View Background Depth Map
+	
+</details>
+
 ## BackgroundEstimation
 
 Estimate the background through Depth Map, which considers the object distance to camera.
