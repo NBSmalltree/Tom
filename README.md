@@ -24,6 +24,18 @@ Merge the Background from the warped left view and the warped right view, consid
 
 Estimate the background through Depth Map, which considers the object distance to camera.
 
+<details>
+<summary>IO :</summary>
+
+  - Input : 
+    - A Certain View Color Image
+	- A Certain View Depth Map
+  - Output : 
+    - Certain View Background Color Image
+	- Certain View Background Depth Map
+	
+</details>
+
 ## NBU
 
 Temporal File of NBU OJ.
