@@ -219,7 +219,7 @@ void CBackgroundEstimation::calcHist()
 			//>测试最大值最小值
 			cPixelHist.findMaxandMin();
 
-			//如果最高峰频次（高度）小于N/5，则此像素点的背景深度值赋值为0【参数3、4间调整】
+			//>如果最高峰频次（高度）小于N/5，则此像素点的背景深度值赋值为0【参数3、4间调整】,用以连续前景区域
 			if (cPixelHist.getMaxBarValue() < m_iUpdateStep / 3) {
 				yuvBuffer.Y[h][w] = 0;
 				continue;
@@ -254,6 +254,34 @@ void CBackgroundEstimation::inpaint(int height, int width, CIYuv *yuvBuffer)
 		for (int w = 0; w < width; w++) {
 			if (backgroundLine[w] == 0)
 				inpaintMaskLine[w] = 255;
+		}
+	}
+
+	//>掩膜中排除结构性空洞
+	int top_index, bottom_index, left_index, right_index, sum_index;
+	for (int h = 0; h < height; h++) {
+		uchar* inpaintMaskLine = inpaintMask.ptr<uchar>(h);
+		for (int w = 0; w < width; w++) {
+			//>如果在掩膜中是空洞像素，判断其上下左右是否为空洞，若空洞总数大于等于2则排除掩膜(即不inpaint)
+			if (inpaintMaskLine[w] == 255) {
+				top_index = CLIP3(h - 1, 0, height);
+				bottom_index = CLIP3(h + 1, 0, height);
+				left_index = CLIP3(w - 1, 0, width);
+				right_index = CLIP3(w + 1, 0, width);
+
+				sum_index = 0;
+				if (yuvBuffer->Y[top_index][w] == 0)
+					sum_index++;
+				if (yuvBuffer->Y[bottom_index][w] == 0)
+					sum_index++;
+				if (yuvBuffer->Y[h][left_index] == 0)
+					sum_index++;
+				if (yuvBuffer->Y[h][right_index] == 0)
+					sum_index++;
+
+				if (sum_index >= 2)
+					inpaintMaskLine[w] = 0;
+			}
 		}
 	}
 

@@ -146,8 +146,8 @@ void CColorBackground::buildOneFrameColorBackground()
 	for (int h = 0; h < m_iHeight; h++) {
 		for (int w = 0; w < m_iWidth; w++) {
 			//>ÅÅ³ýÉî¶È±³¾°Í¼ÖÐµÄ¿Õ¶´
-			if(m_depthBackgroundYUV->Y[h][w] == 0)
-				continue;
+			//if(m_depthBackgroundYUV->Y[h][w] == 0)
+			//	continue;
 
 			rangeMin = CLIP3(m_depthBackgroundYUV->Y[h][w] - m_iRange, 0, 255);
 			rangeMax = CLIP3(m_depthBackgroundYUV->Y[h][w] + m_iRange, 0, 255);
