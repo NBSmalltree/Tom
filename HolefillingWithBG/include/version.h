@@ -1,3 +1,3 @@
-#define VERSION 0.2
+#define VERSION 0.3
 
 #define OUTPUT_COMPUTATIONAL_TIME

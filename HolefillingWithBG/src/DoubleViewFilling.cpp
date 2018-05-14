@@ -155,6 +155,7 @@ bool CDoubleViewFilling::isHoleinColor(CIYuv *yuvBuffer, int h, int w)
 1、如果左视点深度值不为零就用左视点的值填
 2、如果右视点深度值不为零就用右视点的值填
 3、如果两视点深度值均不为零就用深度值较小的视点信息来填
+4、【补充】如果两视点深度值均为0(但是彩色值可能不为0的特殊情况),按下述指定规则来填
 */
 void CDoubleViewFilling::mergeWithZBuffer(CIYuv *leftColor, CIYuv *leftDepth, CIYuv *rghtColor, CIYuv *rghtDepth, CIYuv *outColor, CIYuv *outDepth)
 {
@@ -189,6 +190,32 @@ void CDoubleViewFilling::mergeWithZBuffer(CIYuv *leftColor, CIYuv *leftDepth, CI
 
 					outDepth->Y[h][w] = rghtDepth->Y[h][w];
 				}
+			}
+			//>该像素点左右视点深度值为0，但彩色图值不为0，则分三种情况讨论(左有值，右有值，两个都有值)
+			//>(该问题由前一阶段背景生成算法中有些像素点原始深度图中是0带来)
+			//>所以深度图中值为0，彩色图中值不一定为0
+			else if (leftDepth->Y[h][w] == 0 && rghtDepth->Y[h][w] == 0) {
+				if (leftColor->Y[h][w] != 0 && rghtColor->Y[h][w] != 0) {
+					outColor->Y[h][w] = (char)((leftColor->Y[h][w] + rghtColor->Y[h][w]) / 2);
+					outColor->U[h / 2][w / 2] = (char)((leftColor->U[h / 2][w / 2] + rghtColor->U[h / 2][w / 2]) / 2);
+					outColor->V[h / 2][w / 2] = (char)((leftColor->V[h / 2][w / 2] + rghtColor->V[h / 2][w / 2]) / 2);
+				}
+				else if (leftColor->Y[h][w] == 0 && rghtColor->Y[h][w] == 0) {
+					outDepth->Y[h][w] = 0;
+					continue;
+				}
+				else if (leftColor->Y[h][w] != 0) {
+					outColor->Y[h][w] = leftColor->Y[h][w];
+					outColor->U[h / 2][w / 2] = leftColor->U[h / 2][w / 2];
+					outColor->V[h / 2][w / 2] = leftColor->V[h / 2][w / 2];
+				}
+				else if (rghtColor->Y[h][w] != 0) {
+					outColor->Y[h][w] = rghtColor->Y[h][w];
+					outColor->U[h / 2][w / 2] = rghtColor->U[h / 2][w / 2];
+					outColor->V[h / 2][w / 2] = rghtColor->V[h / 2][w / 2];
+				}
+
+				outDepth->Y[h][w] = 0;
 			}
 		}
 	}
