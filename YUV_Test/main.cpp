@@ -11,9 +11,9 @@ using namespace std;
 #define BACKGROUND_AVERAGE 0
 #define BACKGROUND_GMM 0
 #define HOLEFILL 0
-#define PSNR_AND_MSSIM 0
+#define PSNR_AND_MSSIM 1
 #define YUV_READ_AND_WRITE 0
-#define Y_CHANNEL_INPAINT 1
+#define Y_CHANNEL_INPAINT 0
 
 int main(int argc, char ** argv)
 {
@@ -140,10 +140,6 @@ int main(int argc, char ** argv)
 
 #if PSNR_AND_MSSIM
 
-	//>申明存放Mat类型空间
-	cv::Mat srcImage1(768, 1024, CV_8UC3);
-	cv::Mat srcImage2(768, 1024, CV_8UC3);
-
 	//>读取文件流
 	FILE *fin_src1, *fin_src2;
 	if ((fin_src1 = fopen(argv[1], "rb")) == NULL ||
@@ -152,10 +148,16 @@ int main(int argc, char ** argv)
 		return 2;
 	}
 	int totalFrame = atoi(argv[3]);
+	int m_iHeight = atoi(argv[4]);
+	int m_iWidth = atoi(argv[5]);
+
+	//>申明存放Mat类型空间
+	cv::Mat srcImage1(m_iHeight, m_iWidth, CV_8UC3);
+	cv::Mat srcImage2(m_iHeight, m_iWidth, CV_8UC3);
 
 	//>Init YUV Buffer
 	CIYuv yuvBuffer;
-	if (!yuvBuffer.Resize(768, 1024, 420))
+	if (!yuvBuffer.Resize(m_iHeight, m_iWidth, 420))
 		return 2;
 
 	//>Init sumValue;
@@ -188,7 +190,7 @@ int main(int argc, char ** argv)
 	}
 
 	std::cout << "PSNR : " << sumOfPSNR / totalFrame << std::endl;
-	std::cout << "MSSIM : " << (sumOfMSSIM[0] + sumOfMSSIM[1] + sumOfMSSIM[2]) / totalFrame << std::endl;
+	std::cout << "MSSIM : " << (sumOfMSSIM[0] + sumOfMSSIM[1] + sumOfMSSIM[2]) / totalFrame / 3 << std::endl;
 
 	system("pause");
 
