@@ -20,6 +20,7 @@ public:
 
 	void mergeWithZBuffer(CIYuv *leftColor, CIYuv *leftDepth, CIYuv *rghtColor, CIYuv *rghtDepth, CIYuv *outColor, CIYuv *outDepth);
 	void fillingWithZBuffer(CIYuv *inputColor, CIYuv *inputDepth, CIYuv *bgColor, CIYuv *bgDepth, CIYuv *outColor, CIYuv *outDepth);
+	void fillingSmallHolesinLine(CIYuv *input);
 
 	void doOneFrame();
 

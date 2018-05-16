@@ -315,6 +315,60 @@ void CDoubleViewFilling::fillingWithZBuffer(CIYuv *inputColor, CIYuv *inputDepth
 	}
 }
 
+void CDoubleViewFilling::fillingSmallHolesinLine(CIYuv * input)
+{
+	//>w1:Hole_Start;w2:Hole_End
+	int len, w1, w2;
+
+	for (int h = 0; h < m_iHeight; h++) {
+		for (int w = 0; w < m_iWidth; w++) {
+			//>如果当前像素是空洞点
+			if (input->Y[h][w] == 0) {
+				w1 = w;
+				len = 0;
+				//w = CLIP3(w + 1, 0, m_iWidth - 1);
+				while (input->Y[h][w] == 0) {
+					len++;
+					w++;
+					if (w >= m_iWidth)
+						break;
+				}
+				w2 = w - 1;
+
+				//>如果空洞起始点为0号像素,那么可以假设空洞结束点值不为0
+				if (w1 == 0) {
+					for (int i = w1; i <= w2; i++) {
+						input->Y[h][i] = input->Y[h][w2 + 1];
+						input->U[h / 2][i / 2] = input->U[h / 2][(w2 + 1) / 2];
+						input->V[h / 2][i / 2] = input->V[h / 2][(w2 + 1) / 2];
+					}
+				}
+				//>如果空洞结束点为m_iWidth-1号像素,那么可以假设空洞开始点值不为0
+				else if (w2 == m_iWidth - 1) {
+					for (int i = w1; i <= w2; i++) {
+						input->Y[h][i] = input->Y[h][w1 - 1];
+						input->U[h / 2][i / 2] = input->U[h / 2][(w1 - 1) / 2];
+						input->V[h / 2][i / 2] = input->V[h / 2][(w1 - 1) / 2];
+					}
+				}
+				//>如果空洞开始点和结束点均有值
+				else {
+					for (int i = w1; i <= w2; i++) {
+						input->Y[h][i] = (char)((input->Y[h][w1 - 1] + input->Y[h][w2 + 1]) / 2);
+						input->U[h / 2][i / 2] = (char)((input->U[h / 2][(w1 - 1) / 2] + input->U[h / 2][(w2 + 1) / 2]) / 2);
+						input->V[h / 2][i / 2] = (char)((input->V[h / 2][(w1 - 1) / 2] + input->V[h / 2][(w2 + 1) / 2]) / 2);
+					}
+				}
+		
+				//>以红色测试
+				//input->Y[h][w] = 76;
+				//input->U[h / 2][w / 2] = 85;
+				//input->V[h / 2][w / 2] = 255;
+			}
+		}
+	}
+}
+
 /*void CDoubleViewFilling::fillingWithZBuffer(CIYuv *inputColor, CIYuv *inputDepth, CIYuv *bgColor, CIYuv *bgDepth, CIYuv *outColor, CIYuv *outDepth)
 {
 	int depthThreshold = 5;
@@ -398,4 +452,5 @@ void CDoubleViewFilling::doOneFrame()
 	mergeWithZBuffer(m_pcLeftColor, m_pcLeftDepth, m_pcRghtColor, m_pcRghtDepth, temp1, temp2);
 	//mergeWithZBuffer(m_pcLeftColor, m_pcLeftDepth, m_pcRghtColor, m_pcRghtDepth, m_pcOutColor, m_pcOutDepth);
 	fillingWithZBuffer(temp1, temp2, m_pcBGColor, m_pcBGDepth, m_pcOutColor, m_pcOutDepth);
+	fillingSmallHolesinLine(m_pcOutColor);
 }
