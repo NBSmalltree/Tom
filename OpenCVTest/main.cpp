@@ -39,7 +39,8 @@ using namespace cv;
 # define YUV_CLASS 0
 
 # define WATERSHED 0
-# define INPAINT 1
+# define INPAINT 0
+# define MYINPAINT 1
 
 //--------------------------全局函数申明部分;----------------------------
 static void on_ContrastAndBright(int, void *);
@@ -1121,6 +1122,30 @@ int main(int argc, char ** argv) {
 	}
 	
 #endif // INPAINT
+	
+#if MYINPAINT
+	cv::Mat srcImage = cv::imread("002.bmp", 2 | 4);
+	//cv::imshow("srcImage", srcImage);
+
+	cv::Mat inpaintMask = cv::Mat::zeros(srcImage.size(), CV_8UC1);
+
+	for (int h = 0; h < srcImage.rows;h++) {
+		uchar* srcLine = srcImage.ptr<uchar>(h);
+		uchar* mskLine = inpaintMask.ptr<uchar>(h);
+		for (int w = 0; w < srcImage.cols; w++)
+			if (srcLine[3 * w] == 0 && srcLine[3 * w + 1] == 0 && srcLine[3 * w + 2] == 0)
+				mskLine[w] = 255;
+	}
+
+	//cv::imshow("Mask", inpaintMask);
+
+	cv::Mat inpaintedImage;
+	inpaint(srcImage, inpaintMask, inpaintedImage, 3, INPAINT_NS);
+	cv::imwrite("TARGET1.bmp", inpaintedImage);
+	cv::imshow("Output", inpaintedImage);
+
+#endif // MYINPAINT
+
 /*
 	Mat src = imread("1.jpg", 2 | 4);
 
