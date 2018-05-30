@@ -273,7 +273,7 @@ bool CIYuv::WriteOneFrame_inYUV(FILE *fp)
   return true;
 }
 
-void CIYuv::getData_inBGR(cv::Mat *imgBGR)
+void CIYuv::setData_inBGR(cv::Mat *imgBGR)
 {
   int h, w, cH, cW;
   int ir, ig, ib;

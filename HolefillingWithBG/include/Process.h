@@ -33,7 +33,9 @@ private:
 
 	//>SingleViewFilling Input Parameter
 	std::string m_cSourceVideoName;
+	std::string m_cSourceDepthName;
 	std::string m_cBackgroundImageName;
+	std::string m_cBackgroundDepthName;
 
 	//>DoubleViewFilling Input Parameter
 	std::string m_cLeftImageName;
@@ -49,7 +51,9 @@ private:
 	std::string m_cOutDepthName;
 
 	FILE *fin_video;
-	FILE *fin_background;
+	FILE *fin_depth;
+	FILE *fin_backgroundcolor;
+	FILE *fin_backgrounddepth;
 
 	FILE *fin_leftcolor;
 	FILE *fin_rghtcolor;

@@ -41,7 +41,9 @@ UInt ParameterViewSyn::setup()
 
 	//>SingleViewFilling Input Parameter
 	m_pCfgLines[uiParLnCount++] = new ConfigLineStr("SourceVideoName", &m_cSourceVideoName, "test.yuv");
+	m_pCfgLines[uiParLnCount++] = new ConfigLineStr("SourceDepthName", &m_cSourceDepthName, "test_depth.yuv");
 	m_pCfgLines[uiParLnCount++] = new ConfigLineStr("BackgroundImageName", &m_cBackgroundImageName, "ColorBackground.yuv");
+	m_pCfgLines[uiParLnCount++] = new ConfigLineStr("BackgroundDepthName", &m_cBackgroundDepthName, "DepthBackground.yuv");
 
 	//>DoubleViewFilling Input Parameter
 	m_pCfgLines[uiParLnCount++] = new ConfigLineStr("LeftImageName", &m_cLeftImageName, "leftcolor.yuv");

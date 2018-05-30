@@ -1,5 +1,6 @@
 #pragma once
 #include "yuv.h"
+#include "opencv2/photo/photo.hpp"
 
 class CUsingBackground
 {
@@ -15,10 +16,16 @@ public:
 	bool allocateMem();
 	void releaseMem();
 
+	bool isHoleinColor(CIYuv *yuvBuffer, int h, int w);
+	void fillDepthStreamHole(CIYuv *yuvBuffer);
+	void inpaint(CIYuv *yuvBuffer);
+
 	void doOneFrame();
 
 	CIYuv* getInVideoBuffer() { return m_pcInVideo; }
-	CIYuv* getBackgroundBuffer() { return m_pcBackground; }
+	CIYuv* getInDepthBuffer() { return m_pcInDepth; }
+	CIYuv* getBGColorBuffer() { return m_pcBGColor; }
+	CIYuv* getBGDepthBuffer() { return m_pcBGDepth; }
 	CIYuv* getOutVideoBuffer() { return m_pcOutVideo; }
 
 private:
@@ -28,7 +35,11 @@ private:
 	int m_iTotalFrame;
 
 	CIYuv *m_pcInVideo;
-	CIYuv *m_pcBackground;
+	CIYuv *m_pcInDepth;
+	CIYuv *m_pcBGColor;
+	CIYuv *m_pcBGDepth;
 	CIYuv *m_pcOutVideo;
+
+	cv::Mat *m_pcMatBuffer;
 };
 

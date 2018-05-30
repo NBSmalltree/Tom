@@ -20,7 +20,9 @@ public:
 
 	//>SingleViewFilling
 	std::string getSourceVideoName() { return m_cSourceVideoName; }
+	std::string getSourceDepthName() { return m_cSourceDepthName; }
 	std::string getBackgroundImageName() { return m_cBackgroundImageName; }
+	std::string getBackgroundDepthName() { return m_cBackgroundDepthName; }
 
 	//>DoubleViewFilling
 	std::string getLeftImageName() { return m_cLeftImageName; }
@@ -48,7 +50,9 @@ protected:
 
 	//>SingleViewFilling Input Parameter
 	std::string m_cSourceVideoName;
+	std::string m_cSourceDepthName;
 	std::string m_cBackgroundImageName;
+	std::string m_cBackgroundDepthName;
 
 	//>DoubleViewFilling Input Parameter
 	std::string m_cLeftImageName;

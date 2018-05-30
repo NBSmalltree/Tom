@@ -31,7 +31,7 @@ public:
   
   bool      WriteOneFrame_inYUV(FILE *fp);  // GIST test
  
-  void      getData_inBGR      (cv::Mat *imgBGR);
+  void      setData_inBGR      (cv::Mat *imgBGR);
 
   void      setDataFromImgBGR    (cv::Mat *imgBGR);
   void      setDataFromImgYUV    (IplImage *imgYUV);

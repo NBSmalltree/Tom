@@ -10,7 +10,9 @@ CHoleFilling::CHoleFilling()
 	m_uiIsSingleViewFilling = 1;
 
 	fin_video = nullptr;
-	fin_background = nullptr;
+	fin_depth = nullptr;
+	fin_backgroundcolor = nullptr;
+	fin_backgrounddepth = nullptr;
 
 	fin_leftcolor = nullptr;
 	fin_rghtcolor = nullptr;
@@ -27,8 +29,12 @@ CHoleFilling::~CHoleFilling()
 {
 	if (fin_video)
 		fclose(fin_video);
-	if (fin_background)
-		fclose(fin_background);
+	if (fin_depth)
+		fclose(fin_depth);
+	if (fin_backgroundcolor)
+		fclose(fin_backgroundcolor);
+	if (fin_backgrounddepth)
+		fclose(fin_backgrounddepth);
 
 	if (fin_leftcolor)
 		fclose(fin_leftcolor);
@@ -60,7 +66,9 @@ void CHoleFilling::Init(ParameterViewSyn cParameter)
 
 	//>SingleViewFilling Input Parameter
 	m_cSourceVideoName = cParameter.getSourceVideoName();
+	m_cSourceDepthName = cParameter.getSourceDepthName();
 	m_cBackgroundImageName = cParameter.getBackgroundImageName();
+	m_cBackgroundDepthName = cParameter.getBackgroundDepthName();
 
 	//>DoubleViewFilling Input Parameter
 	m_cLeftImageName = cParameter.getLeftImageName();
@@ -88,7 +96,9 @@ bool CHoleFilling::initUsingBackground()
 		return false;
 
 	if (fopen_s(&fin_video, m_cSourceVideoName.c_str(), "rb") ||
-		fopen_s(&fin_background, m_cBackgroundImageName.c_str(), "rb")||
+		fopen_s(&fin_depth, m_cSourceDepthName.c_str(), "rb") ||
+		fopen_s(&fin_backgroundcolor, m_cBackgroundImageName.c_str(), "rb")||
+		fopen_s(&fin_backgrounddepth, m_cBackgroundDepthName.c_str(), "rb") ||
 		fopen_s(&fout_color, m_cOutImageName.c_str(), "wb"))
 		return false;
 
@@ -101,8 +111,12 @@ void CHoleFilling::releaseUsingBackground()
 
 	if (fin_video)
 		fclose(fin_video);
-	if (fin_background)
-		fclose(fin_background);
+	if (fin_depth)
+		fclose(fin_depth);
+	if (fin_backgroundcolor)
+		fclose(fin_backgroundcolor);
+	if (fin_backgrounddepth)
+		fclose(fin_backgrounddepth);
 	if (fout_color)
 		fclose(fout_color);
 
@@ -195,7 +209,8 @@ bool CHoleFilling::doHoleFilling()
 bool CHoleFilling::singleViewFillingWithBG()
 {
 	//>Read Background Image From File
-	if (!m_pUsingBackground->getBackgroundBuffer()->ReadOneFrame(fin_background, 0)) {
+	if (!(m_pUsingBackground->getBGColorBuffer()->ReadOneFrame(fin_backgroundcolor, 0) &&
+		m_pUsingBackground->getBGDepthBuffer()->ReadOneFrame(fin_backgrounddepth, 0))) {
 		std::cout << "Set Frame Head Failure!" << std::endl;
 		return false;
 	}
@@ -203,7 +218,8 @@ bool CHoleFilling::singleViewFillingWithBG()
 	for (int n = m_iStartFrame; n < m_iStartFrame + m_iTotalFrame; n++) {
 
 		//>Read One InVideo Frame From File
-		if (!m_pUsingBackground->getInVideoBuffer()->ReadOneFrame(fin_video, n)) {
+		if (!(m_pUsingBackground->getInVideoBuffer()->ReadOneFrame(fin_video, n) &&
+			m_pUsingBackground->getInDepthBuffer()->ReadOneFrame(fin_depth, n))) {
 			std::cout << "Set Frame Head Failure!" << std::endl;
 			return false;
 		}
