@@ -11,9 +11,10 @@ using namespace std;
 #define BACKGROUND_AVERAGE 0
 #define BACKGROUND_GMM 0
 #define HOLEFILL 0
-#define PSNR_AND_MSSIM 1
+#define PSNR_AND_MSSIM 0
 #define YUV_READ_AND_WRITE 0
 #define Y_CHANNEL_INPAINT 0
+#define YUV2MAT2YUV 1
 
 int main(int argc, char ** argv)
 {
@@ -283,6 +284,34 @@ int main(int argc, char ** argv)
 	fclose(fout);
 
 #endif // Y_CHANNEL_INPAINT
+
+#if YUV2MAT2YUV
+	FILE *fin, *fout;
+	if (fopen_s(&fin, argv[1], "rb") ||
+		fopen_s(&fout, argv[2], "wb"))
+		return 1;
+
+	CIYuv yuvBuffer;
+	yuvBuffer.Resize(atoi(argv[3]), atoi(argv[4]), 420);
+	CIYuv outBuffer;
+	outBuffer.Resize(atoi(argv[3]), atoi(argv[4]), 420);
+
+	for (int n = 0; n < atoi(argv[5]); n++) {
+		yuvBuffer.ReadOneFrame(fin, n);
+
+		cv::Mat MatBuffer(atoi(argv[3]), atoi(argv[4]), CV_8UC3);
+		yuvBuffer.getData_inBGR(&MatBuffer);
+
+		outBuffer.setDataFromImgBGR(&MatBuffer);
+
+		outBuffer.WriteOneFrame(fout);
+	}
+
+	fclose(fin);
+	fclose(fout);
+
+
+#endif // YUV2MAT2YUV
 
 	return 0;
 }
