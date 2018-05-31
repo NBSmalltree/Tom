@@ -14,7 +14,8 @@ using namespace std;
 #define PSNR_AND_MSSIM 0
 #define YUV_READ_AND_WRITE 0
 #define Y_CHANNEL_INPAINT 0
-#define YUV2MAT2YUV 1
+#define YUV2MAT2YUV 0
+#define YUV2PNG 1
 
 int main(int argc, char ** argv)
 {
@@ -312,6 +313,34 @@ int main(int argc, char ** argv)
 
 
 #endif // YUV2MAT2YUV
+	
+
+#if YUV2PNG
+
+	FILE *fin;
+	if (fopen_s(&fin, argv[1], "rb"))
+		return 1;
+	CIYuv yuvBuffer;
+	yuvBuffer.Resize(atoi(argv[2]), atoi(argv[3]), 420);
+
+	for (int n = 0; n < atoi(argv[4]); n++) {
+		yuvBuffer.ReadOneFrame(fin, n);
+
+		cv::Mat MatBuffer(atoi(argv[2]), atoi(argv[3]), CV_8UC3);
+		yuvBuffer.getData_inBGR(&MatBuffer);
+
+		std::string outname = argv[5];
+		char num[3];
+		_itoa(n, num, 10);
+		outname += num;
+		outname += ".png";
+		cv::imwrite(outname, MatBuffer);
+	}
+
+	fclose(fin);
+
+#endif // YUV2PNG
+
 
 	return 0;
 }
