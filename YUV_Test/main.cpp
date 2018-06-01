@@ -15,7 +15,8 @@ using namespace std;
 #define YUV_READ_AND_WRITE 0
 #define Y_CHANNEL_INPAINT 0
 #define YUV2MAT2YUV 0
-#define YUV2PNG 1
+#define YUV2PNG 0
+#define PSNR_AND_SSIM_IMAGE_SERIES 1
 
 int main(int argc, char ** argv)
 {
@@ -341,6 +342,48 @@ int main(int argc, char ** argv)
 
 #endif // YUV2PNG
 
+
+#if PSNR_AND_SSIM_IMAGE_SERIES
+	//>读取文件夹的路径及公共名字
+	std::string filePath1 = argv[1];
+	std::string filePath2 = argv[2];
+
+	int totalFrame = atoi(argv[3]);
+	int m_iHeight = atoi(argv[4]);
+	int m_iWidth = atoi(argv[5]);
+
+	//>申明存放Mat类型空间
+	cv::Mat srcImage1(m_iHeight, m_iWidth, CV_8UC3);
+	cv::Mat srcImage2(m_iHeight, m_iWidth, CV_8UC3);
+
+	//>Init sumValue;
+	double sumOfPSNR = 0;
+	cv::Scalar sumOfMSSIM = 0;
+
+	//>Start Processing
+	for (int i = 0; i < totalFrame; i++) {
+
+		char num[4];
+		_itoa(i, num, 10);
+		std::string name1 = filePath1 + num;
+		std::string name2 = filePath2 + num;
+		name1 += ".png";
+		name2 += ".png";
+		//>Read Certain Frame
+		srcImage1 = cv::imread(name1, 2 | 4);
+		srcImage2 = cv::imread(name2, 2 | 4);
+
+		//>【Test】imshow
+		//cv::imshow("输出图1;", srcImage1);
+		//cv::imshow("输出图2;", srcImage2);
+		//cv::waitKey(0);
+		sumOfPSNR += getPSNR(srcImage1, srcImage2);
+		sumOfMSSIM += getMSSIM(srcImage1, srcImage2);
+	}
+
+	std::cout << "PSNR : " << sumOfPSNR / totalFrame << std::endl;
+	std::cout << "MSSIM : " << (sumOfMSSIM[0] + sumOfMSSIM[1] + sumOfMSSIM[2]) / totalFrame / 3 << std::endl;
+#endif // PSNR_AND_SSIM_IMAGE_SERIES
 
 	return 0;
 }

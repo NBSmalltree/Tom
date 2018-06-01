@@ -3,8 +3,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LocalDebuggerWorkingDirectory>D:\Projects\C\Tom\YUV_Test\Y_CHANNEL_INPAINT</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>
-    </LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>C:\Users\Tom\Desktop\YUV2PNG\output\color- C:\Users\Tom\Desktop\FRGR\PoznanStreet-v3v4\project- 50 1088 1920</LocalDebuggerCommandArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LocalDebuggerWorkingDirectory>D:\Projects\C\Tom\YUV_Test\Y_CHANNEL_INPAINT</LocalDebuggerWorkingDirectory>
