@@ -16,7 +16,8 @@ using namespace std;
 #define Y_CHANNEL_INPAINT 0
 #define YUV2MAT2YUV 0
 #define YUV2PNG 0
-#define PSNR_AND_SSIM_IMAGE_SERIES 1
+#define YUV2BMP 1
+#define PSNR_AND_SSIM_IMAGE_SERIES 0
 
 int main(int argc, char ** argv)
 {
@@ -342,6 +343,31 @@ int main(int argc, char ** argv)
 
 #endif // YUV2PNG
 
+#if YUV2BMP
+
+	FILE *fin;
+	if (fopen_s(&fin, argv[1], "rb"))
+		return 1;
+	CIYuv yuvBuffer;
+	yuvBuffer.Resize(atoi(argv[2]), atoi(argv[3]), 420);
+
+	for (int n = 0; n < atoi(argv[4]); n++) {
+		yuvBuffer.ReadOneFrame(fin, n);
+
+		cv::Mat MatBuffer(atoi(argv[2]), atoi(argv[3]), CV_8UC3);
+		yuvBuffer.getData_inBGR(&MatBuffer);
+
+		std::string outname = argv[5];
+		char num[3];
+		_itoa(n, num, 10);
+		outname += num;
+		outname += ".bmp";
+		cv::imwrite(outname, MatBuffer);
+	}
+
+	fclose(fin);
+
+#endif // YUV2BMP
 
 #if PSNR_AND_SSIM_IMAGE_SERIES
 	//>读取文件夹的路径及公共名字
