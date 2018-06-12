@@ -175,6 +175,82 @@ void CUsingBackground::inpaint(CIYuv * yuvBuffer)
 	yuvBuffer->setDataFromImgBGR(&inpaintedImage);
 }
 
+/*
+1、按行填补每一帧彩色图空洞，确定当前空洞左边第一个不为0值的坐标和右边第一个不为0值的坐标
+2、如果当前空洞点在画面最左边，则以右边第一个不为0值坐标赋值该片区域
+3、如果当前空洞区域包含画幅最右边点，则以左边第一个不为0值坐标赋值该片区域
+4、如果当前空洞区域左右均有值，则考虑以左右第一个不为空洞点的深度值较小者赋值该片区域
+*/
+void CUsingBackground::VSRSInpaint(CIYuv * yuvBuffer, CIYuv * depthBuffer)
+{
+	for (int h = 0; h < m_iHeight; h++) {
+		for (int w = 0; w < m_iWidth; w++) {
+			//>如果当前像素是空洞点，此处只判定了Y通道
+			if (yuvBuffer->Y[h][w] == 0) {
+				//>如果当前像素是左边第一个点
+				if (w == 0) {
+					int len = 1;
+					while (yuvBuffer->Y[h][len] == 0) {
+						len++;
+						if (len >= m_iWidth)
+							break;
+					}
+					for (int j = 0; j < len; j++) {
+						yuvBuffer->Y[h][j] = yuvBuffer->Y[h][len];
+						yuvBuffer->U[h / 2][j / 2] = yuvBuffer->U[h / 2][len / 2];
+						yuvBuffer->V[h / 2][j / 2] = yuvBuffer->V[h / 2][len / 2];
+					}
+					w = len;
+				}
+				else {
+					int leftDepth = depthBuffer->Y[h][w - 1];
+					int leftValueY = yuvBuffer->Y[h][w - 1];
+					int leftValueU = yuvBuffer->U[h / 2][(w - 1) / 2];
+					int leftValueV = yuvBuffer->V[h / 2][(w - 1) / 2];
+					int len = 1;
+					while (yuvBuffer->Y[h][w + len] == 0) {
+						len++;
+						if (len >= m_iWidth - w)
+							break;
+					}
+					//>如果当前空洞区域包含画幅最右边点
+					if (w + len >= m_iWidth) {
+						for (int j = w; j < w + len; j++) {
+							yuvBuffer->Y[h][j] = leftValueY;
+							yuvBuffer->U[h / 2][j / 2] = leftValueU;
+							yuvBuffer->V[h / 2][j / 2] = leftValueV;
+						}
+						w = m_iWidth - 1;
+					}
+					else {
+						int rghtDepth = depthBuffer->Y[h][w + len];
+						int rghtValueY = yuvBuffer->Y[h][w + len];
+						int rghtValueU = yuvBuffer->U[h / 2][(w + len) / 2];
+						int rghtValueV = yuvBuffer->V[h / 2][(w + len) / 2];
+
+						if (leftDepth <= rghtDepth) {
+							for (int j = w; j < w + len; j++) {
+								yuvBuffer->Y[h][j] = leftValueY;
+								yuvBuffer->U[h / 2][j / 2] = leftValueU;
+								yuvBuffer->V[h / 2][j / 2] = leftValueV;
+							}
+						}
+						else {
+							for (int j = w; j < w + len; j++) {
+								yuvBuffer->Y[h][j] = rghtValueY;
+								yuvBuffer->U[h / 2][j / 2] = rghtValueU;
+								yuvBuffer->V[h / 2][j / 2] = rghtValueV;
+							}
+						}
+
+						w += len;
+					}
+				}
+			}
+		}
+	}
+}
+
 void CUsingBackground::doOneFrame()
 {
 	fillDepthStreamHole(m_pcInDepth);
@@ -212,5 +288,6 @@ void CUsingBackground::doOneFrame()
 		}
 	}
 
-	inpaint(m_pcOutVideo);
+	VSRSInpaint(m_pcOutVideo, m_pcInDepth);
+	//inpaint(m_pcOutVideo);
 }

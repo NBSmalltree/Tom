@@ -19,6 +19,7 @@ public:
 	bool isHoleinColor(CIYuv *yuvBuffer, int h, int w);
 	void fillDepthStreamHole(CIYuv *yuvBuffer);
 	void inpaint(CIYuv *yuvBuffer);
+	void VSRSInpaint(CIYuv *yuvBuffer, CIYuv *depthBuffer);
 
 	void doOneFrame();
 
