@@ -23,6 +23,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BGMerge", "BGMerge\BGMerge.
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenCVTransfer", "OpenCVTransfer\OpenCVTransfer.vcxproj", "{8917D6FB-246A-4B9F-BA53-AA83DD34E358}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BGFillingOnly", "BGFillingOnly\BGFillingOnly.vcxproj", "{856294E9-AF5C-4C30-94EB-A5CC408A4ABE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -129,6 +131,16 @@ Global
 		{8917D6FB-246A-4B9F-BA53-AA83DD34E358}.Release|x64.Build.0 = Release|x64
 		{8917D6FB-246A-4B9F-BA53-AA83DD34E358}.Release|x86.ActiveCfg = Release|Win32
 		{8917D6FB-246A-4B9F-BA53-AA83DD34E358}.Release|x86.Build.0 = Release|Win32
+		{856294E9-AF5C-4C30-94EB-A5CC408A4ABE}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{856294E9-AF5C-4C30-94EB-A5CC408A4ABE}.Debug|x64.ActiveCfg = Debug|x64
+		{856294E9-AF5C-4C30-94EB-A5CC408A4ABE}.Debug|x64.Build.0 = Debug|x64
+		{856294E9-AF5C-4C30-94EB-A5CC408A4ABE}.Debug|x86.ActiveCfg = Debug|Win32
+		{856294E9-AF5C-4C30-94EB-A5CC408A4ABE}.Debug|x86.Build.0 = Debug|Win32
+		{856294E9-AF5C-4C30-94EB-A5CC408A4ABE}.Release|Any CPU.ActiveCfg = Release|Win32
+		{856294E9-AF5C-4C30-94EB-A5CC408A4ABE}.Release|x64.ActiveCfg = Release|x64
+		{856294E9-AF5C-4C30-94EB-A5CC408A4ABE}.Release|x64.Build.0 = Release|x64
+		{856294E9-AF5C-4C30-94EB-A5CC408A4ABE}.Release|x86.ActiveCfg = Release|Win32
+		{856294E9-AF5C-4C30-94EB-A5CC408A4ABE}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -267,6 +267,12 @@ void CUsingBackground::doOneFrame()
 					m_pcOutVideo->Y[h][w] = m_pcBGColor->Y[h][w];
 					m_pcOutVideo->U[h / 2][w / 2] = m_pcBGColor->U[h / 2][w / 2];
 					m_pcOutVideo->V[h / 2][w / 2] = m_pcBGColor->V[h / 2][w / 2];
+
+					//>以红色来看填充的区域
+					m_pcOutVideo->Y[h][w] = 76;
+					m_pcOutVideo->U[h / 2][w / 2] = 84;
+					m_pcOutVideo->V[h / 2][w / 2] = 255;
+
 				}
 				//>以黑色来看填充的区域,必须要有,不然会有错误填充
 				else {
@@ -288,6 +294,6 @@ void CUsingBackground::doOneFrame()
 		}
 	}
 
-	VSRSInpaint(m_pcOutVideo, m_pcInDepth);
+	//VSRSInpaint(m_pcOutVideo, m_pcInDepth);
 	//inpaint(m_pcOutVideo);
 }

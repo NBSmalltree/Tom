@@ -5,6 +5,7 @@
 #include <opencv2/photo/photo.hpp>
 #include <yuv.h>
 #include "function.h"
+#include <stdio.h>
 
 using namespace std;
 
@@ -16,8 +17,11 @@ using namespace std;
 #define Y_CHANNEL_INPAINT 0
 #define YUV2MAT2YUV 0
 #define YUV2PNG 0
-#define YUV2BMP 1
+#define YUV2PNG_WITH_WHITEHOLE 0
+#define YUV2BMP 0
 #define PSNR_AND_SSIM_IMAGE_SERIES 0
+#define PSNR_AND_SSIM_IMAGE_SERIES_BMP 0
+#define MAT2YUV 1
 
 int main(int argc, char ** argv)
 {
@@ -83,18 +87,38 @@ int main(int argc, char ** argv)
 
 //求背景(GMM);
 #if BACKGROUND_GMM
+
+	FILE *fin, *fout;
+	if (fopen_s(&fin, argv[1], "rb")||
+		fopen_s(&fout,argv[2], "wb"))
+		return 1;
+
+	CIYuv yuvBuffer;
+	yuvBuffer.Resize(atoi(argv[3]), atoi(argv[4]), 420);
+
+	cv::Mat bgrImage(atoi(argv[3]), atoi(argv[4]), CV_8UC3);
+
 	cv::BackgroundSubtractorMOG2 mog;
 	cv::Mat foreground,bg;
 
-	for (int i = 0; i < 50; i++) {
-		yuvBuffer.ReadOneFrame(fin_view_l_ori, i);
+	for (int i = 0; i < atoi(argv[5]); i++) {
+		yuvBuffer.ReadOneFrame(fin, i);
 		yuvBuffer.getData_inBGR(&bgrImage);
 
 		mog(bgrImage, foreground, 0.01);
 	}
 
 	mog.getBackgroundImage(bg);
-	cv::imshow("掩膜图;", bg);
+
+	yuvBuffer.setDataFromImgBGR(&bg);
+
+	yuvBuffer.WriteOneFrame(fout);
+
+	fclose(fin);
+	fclose(fout);
+
+	//cv::imshow("掩膜图;", bg);
+	//cv::waitKey(0);
 	//imwrite("GMM_5.bmp", bg);
 #endif // BACKGROUND_AVERAGE
 
@@ -145,9 +169,12 @@ int main(int argc, char ** argv)
 #if PSNR_AND_MSSIM
 
 	//>读取文件流
-	FILE *fin_src1, *fin_src2;
+	FILE *fin_src1, *fin_src2, *fout1, *fout2;
 	if ((fin_src1 = fopen(argv[1], "rb")) == NULL ||
-		(fin_src2 = fopen(argv[2], "rb")) == NULL) {
+		(fin_src2 = fopen(argv[2], "rb")) == NULL
+		//(fout1 = fopen("PSNR.txt", "w")) == NULL ||
+		//(fout2 = fopen("SSIM.txt", "w")) == NULL) 
+	){
 		fprintf(stderr, "Can't open input file(s)\n");
 		return 2;
 	}
@@ -172,14 +199,14 @@ int main(int argc, char ** argv)
 	for (int i = 0; i < totalFrame; i++) {
 
 		//>Read Certain Frame 1
-		if (!yuvBuffer.ReadOneFrame(fin_src1, 0))
+		if (!yuvBuffer.ReadOneFrame(fin_src1, i))
 			return 2;
 
 		//>Transfer to Mat 1
 		yuvBuffer.getData_inBGR(&srcImage1);
 
 		//>Read Certain Frame 2
-		if (!yuvBuffer.ReadOneFrame(fin_src2, 0))
+		if (!yuvBuffer.ReadOneFrame(fin_src2, i))
 			return 2;
 
 		//>Transfer to Mat 2
@@ -191,12 +218,27 @@ int main(int argc, char ** argv)
 		//cv::waitKey(0);
 		sumOfPSNR += getPSNR(srcImage1, srcImage2);
 		sumOfMSSIM += getMSSIM(srcImage1, srcImage2);
+
+		//>Write each data to txt file
+		//double psnr = getPSNR(srcImage1, srcImage2);
+		//cv::Scalar ssim = getMSSIM(srcImage1, srcImage2);
+		//double ssim_out = (ssim[0] + ssim[1] + ssim[2]) / 3;
+
+		//char s_psnr[7], s_ssim[6];
+		//sprintf(s_psnr, "%.4f", psnr);
+		//sprintf(s_ssim, "%.4f", ssim_out);
+
+		//char space = ' ';
+		//fwrite(s_psnr, sizeof(s_psnr), 1, fout1);
+		//fwrite(&space, sizeof(char), 1, fout1);
+		//fwrite(s_ssim, sizeof(s_ssim), 1, fout2);
+		//fwrite(&space, sizeof(char), 1, fout2);
 	}
 
 	std::cout << "PSNR : " << sumOfPSNR / totalFrame << std::endl;
 	std::cout << "MSSIM : " << (sumOfMSSIM[0] + sumOfMSSIM[1] + sumOfMSSIM[2]) / totalFrame / 3 << std::endl;
 
-	system("pause");
+	//system("pause");
 
 #endif // PSNR_AND_MSSIM
 
@@ -315,7 +357,6 @@ int main(int argc, char ** argv)
 
 
 #endif // YUV2MAT2YUV
-	
 
 #if YUV2PNG
 
@@ -342,6 +383,44 @@ int main(int argc, char ** argv)
 	fclose(fin);
 
 #endif // YUV2PNG
+
+#if YUV2PNG_WITH_WHITEHOLE
+
+	FILE *fin;
+	if (fopen_s(&fin, argv[1], "rb"))
+		return 1;
+	CIYuv yuvBuffer;
+	yuvBuffer.Resize(atoi(argv[2]), atoi(argv[3]), 420);
+
+	for (int n = 0; n < atoi(argv[4]); n++) {
+		yuvBuffer.ReadOneFrame(fin, n);
+
+		cv::Mat MatBuffer(atoi(argv[2]), atoi(argv[3]), CV_8UC3);
+		yuvBuffer.getData_inBGR(&MatBuffer);
+
+		//>Transfer Black Hole into White
+		for (int h = 0; h < MatBuffer.rows; h++) {
+			uchar* srcLine = MatBuffer.ptr<uchar>(h);
+			for (int w = 0; w < MatBuffer.cols; w++) {
+				if (srcLine[3 * w] <= 3 && srcLine[3 * w + 1] <= 3 && srcLine[3 * w + 2] <= 3) {
+					srcLine[3 * w] = 255;
+					srcLine[3 * w + 1] = 255;
+					srcLine[3 * w + 2] = 255;
+				}
+			}
+		}
+
+		std::string outname = argv[5];
+		char num[3];
+		_itoa(n, num, 10);
+		outname += num;
+		outname += ".png";
+		cv::imwrite(outname, MatBuffer);
+	}
+
+	fclose(fin);
+
+#endif // YUV2PNG_WITH_WHITEHOLE
 
 #if YUV2BMP
 
@@ -370,6 +449,15 @@ int main(int argc, char ** argv)
 #endif // YUV2BMP
 
 #if PSNR_AND_SSIM_IMAGE_SERIES
+
+	//>输出文件名
+	FILE *fout1, *fout2;
+	if ((fout1 = fopen("PSNR.txt", "w")) == NULL ||
+		(fout2 = fopen("SSIM.txt", "w")) == NULL) {
+		fprintf(stderr, "Can't open input file(s)\n");
+		return 2;
+	}
+
 	//>读取文件夹的路径及公共名字
 	std::string filePath1 = argv[1];
 	std::string filePath2 = argv[2];
@@ -403,13 +491,129 @@ int main(int argc, char ** argv)
 		//cv::imshow("输出图1;", srcImage1);
 		//cv::imshow("输出图2;", srcImage2);
 		//cv::waitKey(0);
-		sumOfPSNR += getPSNR(srcImage1, srcImage2);
-		sumOfMSSIM += getMSSIM(srcImage1, srcImage2);
+		//sumOfPSNR += getPSNR(srcImage1, srcImage2);
+		//sumOfMSSIM += getMSSIM(srcImage1, srcImage2);
+
+		//>Write each data to txt file
+		double psnr = getPSNR(srcImage1, srcImage2);
+		cv::Scalar ssim = getMSSIM(srcImage1, srcImage2);
+		double ssim_out = (ssim[0] + ssim[1] + ssim[2]) / 3;
+
+		char s_psnr[7], s_ssim[6];
+		sprintf(s_psnr, "%.4f", psnr);
+		sprintf(s_ssim, "%.4f", ssim_out);
+
+		char space = ' ';
+		fwrite(s_psnr, sizeof(s_psnr), 1, fout1);
+		fwrite(&space, sizeof(char), 1, fout1);
+		fwrite(s_ssim, sizeof(s_ssim), 1, fout2);
+		fwrite(&space, sizeof(char), 1, fout2);
+
 	}
 
-	std::cout << "PSNR : " << sumOfPSNR / totalFrame << std::endl;
-	std::cout << "MSSIM : " << (sumOfMSSIM[0] + sumOfMSSIM[1] + sumOfMSSIM[2]) / totalFrame / 3 << std::endl;
+	//std::cout << "PSNR : " << sumOfPSNR / totalFrame << std::endl;
+	//std::cout << "MSSIM : " << (sumOfMSSIM[0] + sumOfMSSIM[1] + sumOfMSSIM[2]) / totalFrame / 3 << std::endl;
+
 #endif // PSNR_AND_SSIM_IMAGE_SERIES
+
+#if PSNR_AND_SSIM_IMAGE_SERIES_BMP
+
+	//>输出文件名
+	FILE *fout1, *fout2;
+	if ((fout1 = fopen("PSNR.txt", "w")) == NULL ||
+		(fout2 = fopen("SSIM.txt", "w")) == NULL) {
+		fprintf(stderr, "Can't open input file(s)\n");
+		return 2;
+	}
+
+	//>读取文件夹的路径及公共名字
+	std::string filePath1 = argv[1];
+	std::string filePath2 = argv[2];
+
+	int totalFrame = atoi(argv[3]);
+	int m_iHeight = atoi(argv[4]);
+	int m_iWidth = atoi(argv[5]);
+
+	//>申明存放Mat类型空间
+	cv::Mat srcImage1(m_iHeight, m_iWidth, CV_8UC3);
+	cv::Mat srcImage2(m_iHeight, m_iWidth, CV_8UC3);
+
+	//>Init sumValue;
+	double sumOfPSNR = 0;
+	cv::Scalar sumOfMSSIM = 0;
+
+	//>Start Processing
+	for (int i = 0; i < totalFrame; i++) {
+
+		char num[4];
+		_itoa(i, num, 10);
+		std::string name1 = filePath1 + num;
+		std::string name2 = filePath2 + num;
+		name1 += ".bmp";
+		name2 += ".png";
+		//>Read Certain Frame
+		srcImage1 = cv::imread(name1, 2 | 4);
+		srcImage2 = cv::imread(name2, 2 | 4);
+
+		//>【Test】imshow
+		//cv::imshow("输出图1;", srcImage1);
+		//cv::imshow("输出图2;", srcImage2);
+		//cv::waitKey(0);
+		//sumOfPSNR += getPSNR(srcImage1, srcImage2);
+		//sumOfMSSIM += getMSSIM(srcImage1, srcImage2);
+
+		//>Write each data to txt file
+		double psnr = getPSNR(srcImage1, srcImage2);
+		cv::Scalar ssim = getMSSIM(srcImage1, srcImage2);
+		double ssim_out = (ssim[0] + ssim[1] + ssim[2]) / 3;
+
+		char s_psnr[7], s_ssim[6];
+		sprintf(s_psnr, "%.4f", psnr);
+		sprintf(s_ssim, "%.4f", ssim_out);
+
+		char space = ' ';
+		fwrite(s_psnr, sizeof(s_psnr), 1, fout1);
+		fwrite(&space, sizeof(char), 1, fout1);
+		fwrite(s_ssim, sizeof(s_ssim), 1, fout2);
+		fwrite(&space, sizeof(char), 1, fout2);
+	}
+
+	//std::cout << "PSNR : " << sumOfPSNR / totalFrame << std::endl;
+	//std::cout << "MSSIM : " << (sumOfMSSIM[0] + sumOfMSSIM[1] + sumOfMSSIM[2]) / totalFrame / 3 << std::endl;
+
+#endif // PSNR_AND_SSIM_IMAGE_SERIES_BMP
+
+#if MAT2YUV
+	FILE *fout;
+	if (fopen_s(&fout, argv[1], "wb"))
+		return 1;
+
+	char imgName[10];
+	string iName;
+	cv::Mat bgrImage(atoi(argv[2]), atoi(argv[3]), CV_8UC3);
+
+	CIYuv outBuffer;
+	outBuffer.Resize(atoi(argv[3]), atoi(argv[2]), 420);
+
+	for (int n = 0; n < atoi(argv[4]); n++) {
+		_itoa(n, imgName, 10);
+		iName = imgName;
+		iName += ".png";
+		bgrImage = cv::imread(iName, 2 | 4);
+
+		//cv::imshow("temp", bgrImage);
+		//cv::waitKey(0);
+
+		outBuffer.setDataFromImgBGR(&bgrImage);
+
+		outBuffer.WriteOneFrame(fout);
+	}
+
+	if (fout != NULL)
+		fclose(fout);
+
+
+#endif // YUV2MAT2YUV
 
 	return 0;
 }

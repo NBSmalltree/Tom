@@ -3,11 +3,11 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LocalDebuggerWorkingDirectory>.\WorkSpace</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>MergeAndHoleFilling_PoznanStreet_View5from3.cfg</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>MergeAndHoleFilling_AltMoabit_View9from7.cfg</LocalDebuggerCommandArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LocalDebuggerWorkingDirectory>.\WorkSpace</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>MergeAndHoleFilling_PoznanStreet_View5from3.cfg</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>MergeAndHoleFilling_AltMoabit_View9from7.cfg</LocalDebuggerCommandArguments>
   </PropertyGroup>
 </Project>

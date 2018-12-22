@@ -220,7 +220,7 @@ void CBackgroundEstimation::calcHist()
 			cPixelHist.findMaxandMin();
 
 			//>如果最高峰频次（高度）小于N/5，则此像素点的背景深度值赋值为0【参数3、4间调整】,用以连续前景区域
-			if (cPixelHist.getMaxBarValue() < m_iUpdateStep / 3) {
+			if (cPixelHist.getMaxBarValue() < m_iUpdateStep / 5) {
 				yuvBuffer.Y[h][w] = 0;
 				continue;
 			}
@@ -231,8 +231,8 @@ void CBackgroundEstimation::calcHist()
 	}//>全图像遍历完成
 
 	//>深度图空洞修复
-	if(m_flagIsInpaint)
-		inpaint(m_iHeight, m_iWidth, &yuvBuffer);
+	//if(m_flagIsInpaint)
+	//	inpaint(m_iHeight, m_iWidth, &yuvBuffer);
 
 	//>写入生成的深度背景图
 	yuvBuffer.WriteOneFrame(fout_depthBackground);

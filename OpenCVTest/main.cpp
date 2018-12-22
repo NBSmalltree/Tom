@@ -22,7 +22,7 @@ using namespace cv;
 
 # define SIFT_AND_BFMATCHER 0
 # define SURF_AND_BFMATCHER 0
-# define SURF_AND_FLANN 0
+# define SURF_AND_FLANN 1
 # define SURF_AND_FLANN_AND_OBJECT_DETECTION 0
 # define ORB_AND_FLANN 0
 
@@ -40,7 +40,7 @@ using namespace cv;
 
 # define WATERSHED 0
 # define INPAINT 0
-# define MYINPAINT 1
+# define MYINPAINT 0
 
 //--------------------------全局函数申明部分;----------------------------
 static void on_ContrastAndBright(int, void *);
@@ -166,7 +166,7 @@ int main(int argc, char ** argv) {
 	//--------------------------直方图均衡化(彩色)main调用;----------------------------
 	/*
 	Mat srcImage, dstImage, dstImageBlue, dstImageGreen, dstImageRed;
-	srcImage = imread("1.jpg", 1);
+	srcImage = imread("znn.jpg", 1);
 	if (!srcImage.data) { printf("读取图片错误，请确定目录下是否有imread函数指定图片存在~！; \n"); return false; }
 
 	imshow("原始图;", srcImage);
@@ -253,7 +253,7 @@ int main(int argc, char ** argv) {
 	*/
 
 	//--------------------------绘制一维直方图main调用;--------------------------------
-	
+	/*
 	Mat srcImage = imread("1.jpg", 0);
 	imshow("原图;", srcImage);
 	if (!srcImage.data) { cout << "Fail to Load Image" << endl; return 0; }
@@ -286,7 +286,7 @@ int main(int argc, char ** argv) {
 	}
 
 	imshow("一维直方图;", dstImage);
-	
+	*/
 
 	//--------------------------绘制RGB三色直方图main调用;-----------------------------
 	/*
@@ -414,8 +414,10 @@ int main(int argc, char ** argv) {
 
 //--------------------------SIFT的main调用;----------------------------------------
 #if SIFT_AND_BFMATCHER	
-	Mat srcImage1 = imread("ukbench00000.jpg", 2 | 4);
-	Mat srcImage2 = imread("ukbench00001.jpg", 2 | 4);
+	//Mat srcImage1 = imread("ukbench00000.jpg", 2 | 4);
+	//Mat srcImage2 = imread("ukbench00001.jpg", 2 | 4);
+	Mat srcImage1 = imread(argv[1], 2 | 4);
+	Mat srcImage2 = imread(argv[2], 2 | 4);
 
 	//SIFT特征检测;
 	SiftFeatureDetector siftdtc;
@@ -457,8 +459,11 @@ int main(int argc, char ** argv) {
 	//改变console字体颜色;
 	system("color 2F");
 
-	Mat srcImage1 = imread("Bookarrival_Original_view1.bmp", 2 | 4);
-	Mat srcImage2 = imread("Bookarrival_Original_view4.bmp", 2 | 4);
+	//Mat srcImage1 = imread("Bookarrival_Original_view1.bmp", 2 | 4);
+	//Mat srcImage2 = imread("Bookarrival_Original_view4.bmp", 2 | 4);
+	Mat srcImage1 = imread(argv[1], 2 | 4);
+	Mat srcImage2 = imread(argv[2], 2 | 4);
+
 	if (!srcImage1.data || !srcImage2.data)	{
 		cout << "Fail to read images" << endl;
 		return false;
@@ -508,8 +513,12 @@ int main(int argc, char ** argv) {
 	//改变console字体颜色;
 	system("color 2F");
 
-	Mat srcImage1 = imread("ukbench00000.jpg", 2 | 4);
-	Mat srcImage2 = imread("ukbench00001.jpg", 2 | 4);
+	//Mat srcImage1 = imread("ukbench00000.jpg", 2 | 4);
+	//Mat srcImage2 = imread("ukbench00001.jpg", 2 | 4);
+
+	Mat srcImage1 = imread(argv[1], 2 | 4);
+	Mat srcImage2 = imread(argv[2], 2 | 4);
+
 	if (!srcImage1.data || !srcImage2.data) {
 		cout << "Fail to read images" << endl;
 		return false;
@@ -518,7 +527,9 @@ int main(int argc, char ** argv) {
 	imshow("原始图2;", srcImage2);
 
 	//定义需要用到的变量和类;
-	int minHessian = 700;//定义SURF中hessian阈值特征点检测算子;
+	//int minHessian = 700;//定义SURF中hessian阈值特征点检测算子;
+	int minHessian = atoi(argv[3]);
+
 	SurfFeatureDetector detctor(minHessian);//特征检测类对象;
 	std::vector<KeyPoint> keypoints_1, keypoints_2;//vector模板类能够存放任意类型的动态数组，能够增加和压缩数据;
 
@@ -575,8 +586,12 @@ int main(int argc, char ** argv) {
 	//改变console字体颜色;
 	system("color 2F");
 
-	Mat srcImage1 = imread("Bookarrival_Original_view1.bmp", 2 | 4);
-	Mat srcImage2 = imread("Bookarrival_Original_view4.bmp", 2 | 4);
+	//Mat srcImage1 = imread("Bookarrival_Original_view1.bmp", 2 | 4);
+	//Mat srcImage2 = imread("Bookarrival_Original_view4.bmp", 2 | 4);
+
+	Mat srcImage1 = imread(argv[1], 2 | 4);
+	Mat srcImage2 = imread(argv[2], 2 | 4);
+
 	if (!srcImage1.data || !srcImage2.data) {
 		cout << "Fail to read images" << endl;
 		return false;
@@ -679,8 +694,12 @@ int main(int argc, char ** argv) {
 	//改变console字体颜色;
 	system("color 2F");
 
-	Mat srcImage1 = imread("ukbench00000.jpg", 2 | 4);
-	Mat srcImage2 = imread("ukbench00001.jpg", 2 | 4);
+	//Mat srcImage1 = imread("ukbench00000.jpg", 2 | 4);
+	//Mat srcImage2 = imread("ukbench00001.jpg", 2 | 4);
+
+	Mat srcImage1 = imread(argv[1], 2 | 4);
+	Mat srcImage2 = imread(argv[2], 2 | 4);
+
 	if (!srcImage1.data || !srcImage2.data) {
 		cout << "Fail to read images" << endl;
 		return false;
@@ -1124,25 +1143,34 @@ int main(int argc, char ** argv) {
 #endif // INPAINT
 	
 #if MYINPAINT
-	cv::Mat srcImage = cv::imread("002.bmp", 2 | 4);
+	cv::Mat srcImage = cv::imread(argv[1], 2 | 4);
 	//cv::imshow("srcImage", srcImage);
 
-	cv::Mat inpaintMask = cv::Mat::zeros(srcImage.size(), CV_8UC1);
+	cv::Mat inpaintMask = cv::imread(argv[2], 2 | 4);
+	cv::Mat inpaintMask1D = cv::Mat::zeros(srcImage.size(), CV_8UC1);
+	for (int h = 0; h < inpaintMask.rows; h++) {
+		uchar* srcLine = inpaintMask.ptr<uchar>(h);
+		uchar* mskLine = inpaintMask1D.ptr<uchar>(h);
+		for (int w = 0; w < inpaintMask.cols; w++)
+			if (srcLine[3 * w] >= 250 && srcLine[3 * w + 1] == 255 && srcLine[3 * w + 2] == 255)
+				mskLine[w] = 255;
+	}
+	/*cv::Mat inpaintMask = cv::Mat::zeros(srcImage.size(), CV_8UC1);
 
 	for (int h = 0; h < srcImage.rows;h++) {
 		uchar* srcLine = srcImage.ptr<uchar>(h);
 		uchar* mskLine = inpaintMask.ptr<uchar>(h);
 		for (int w = 0; w < srcImage.cols; w++)
-			if (srcLine[3 * w] == 0 && srcLine[3 * w + 1] == 0 && srcLine[3 * w + 2] == 0)
+			if (srcLine[3 * w] == 2 && srcLine[3 * w + 1] == 0 && srcLine[3 * w + 2] == 1)
 				mskLine[w] = 255;
-	}
+	}*/
 
 	//cv::imshow("Mask", inpaintMask);
 
 	cv::Mat inpaintedImage;
-	inpaint(srcImage, inpaintMask, inpaintedImage, 3, INPAINT_NS);
+	inpaint(srcImage, inpaintMask1D, inpaintedImage, 10, INPAINT_NS);
 	cv::imwrite("TARGET1.bmp", inpaintedImage);
-	cv::imshow("Output", inpaintedImage);
+	//cv::imshow("Output", inpaintedImage);
 
 #endif // MYINPAINT
 

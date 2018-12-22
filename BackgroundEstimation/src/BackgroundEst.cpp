@@ -48,8 +48,8 @@ int main(int argc, char ** argv)
 	}
 	
 	//>【测试】计算某一特定像素点的直方图
-	//cBackgroundEstimation.calcOnePixelHist(336, 128);
-
+	//cBackgroundEstimation.calcOnePixelHist(1824, 448);
+	
 	//>计算全画幅直方图，生成背景深度图
 	cBackgroundEstimation.calcHist();
 
